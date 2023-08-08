@@ -1,4 +1,5 @@
 from Database_connection import database_connect
+from Query_creator import create_query_for_search_engine, create_query_for_getting_messages
 import mysql.connector
 from flask import Flask, jsonify, request
 
@@ -388,7 +389,7 @@ def delete_the_announcement(announcement_id):
     else:
         return jsonify(result="Announcement successfully deleted."), 200
 
-        # Closing connection with database and cursor if it exists.
+    # Closing connection with database and cursor if it exists.
     finally:
         if connection:
             connection.close()
@@ -515,7 +516,7 @@ def add_announcement_to_favorite(user_id):
         return jsonify(result="The announcement is already liked"), 400
 
     else:
-        return jsonify(result="Successfully added to favorites."), 200
+        return jsonify(result="Successfully added to favorites."), 201
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -558,7 +559,205 @@ def delete_announcement_from_favorite(favorite_announcement_id):
                 cur.close()
 
 
-# Download from search engine.
+@app.route("/announcements/search", methods=["GET"])
+def get_announcements_by_search_engine():
+    categories = ["Elektronika", "Do domu", "Do ogrodu", "Sport i turystyka", "Motoryzacja", "Zdrowie i uroda",
+                  "Dla dzieci", "Rolnictwo", "Nieruchomości", "Moda", "Kultura i rozrywka", "Oddam za darmo"]
+    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
+    connection = None
+    cur = None
+
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        content_to_search = request.args.get("q")
+        location = request.args.get("l")
+        category = request.args.get("c")
+        # Making query.
+        query = """ SELECT announcements.announcement_id, users.first_name,
+                    announcements.seller_id, categories.name_category,
+                    announcements.title, announcements.description, 
+                    announcements.price, announcements.location
+                    FROM announcements 
+                    JOIN categories ON announcements.category_id=categories.category_id
+                    JOIN users ON announcements.seller_id=users.user_id
+                    WHERE announcements.active_flag=True """
+
+        if content_to_search is not None:
+            # Init query for search field
+            query = create_query_for_search_engine(content_to_search, query, "announcements.title")
+        if location is not None:
+            # Init query for location field
+            query = create_query_for_search_engine(location, query, "announcements.location")
+        # Init query for category id
+        if category in categories:
+            category_id = categories.index(category) + 1
+            query += f"""AND categories.category_id={category_id} """
+
+        query += "ORDER BY announcements.announcement_id DESC"
+        # Executing query.
+        cur.execute(query)
+
+    except mysql.connector.Error as message:
+
+        return jsonify(result=message.msg), 500
+
+    else:
+        return jsonify(result=cur.fetchall()), 200
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+#  announcement_id/ conversation_id
+@app.route("/users/<user_id>/messages", methods=["GET"])
+def get_messages(user_id):
+    connection = None
+    cur = None
+
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        request_data = request.get_json()
+        request_data["user_id"] = user_id
+
+        if "conversation_id" in request_data:
+            messages = create_query_for_getting_messages(cur, request_data)
+
+        else:
+            # Making query.
+            query_check = """SELECT conversation_id FROM conversations
+                             WHERE conversations.announcement_id=%(announcement_id)s
+                             AND conversations.user_id=%(user_id)s """
+            cur.execute(query_check, request_data)
+            conversation_id = cur.fetchall()
+            if conversation_id:
+                request_data["conversation_id"] = conversation_id[0]["conversation_id"]
+                messages = create_query_for_getting_messages(cur, request_data)
+
+            else:
+                messages = []
+
+    except mysql.connector.Error as message:
+
+        return jsonify(result=message.msg), 500
+
+    else:
+        return jsonify(result=messages), 200
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+@app.route("/users/<user_id>/messages", methods=["POST"])
+def send_message(user_id):
+    connection = None
+    cur = None
+
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        request_data = request.get_json()
+        request_data["user_id"] = user_id
+
+        if "conversation_id" in request_data:
+            query = """INSERT INTO messages(conversation_id, user_id, customer_flag, content, date)
+                       VALUES(%(conversation_id)s, %(user_id)s, %(is_user_customer)s, %(content)s, now())"""
+
+            cur.execute(query, request_data)
+            connection.commit()
+
+        else:
+            query_make_conv = """INSERT INTO conversations(announcement_id, user_id)
+                                 VALUES(%(announcement_id)s, %(user_id)s) """
+            cur.execute(query_make_conv, request_data)
+
+            query_check_conv_id = """SELECT conversation_id FROM conversations
+                                     WHERE conversations.announcement_id=%(announcement_id)s
+                                     AND conversations.user_id=%(user_id)s """
+            cur.execute(query_check_conv_id, request_data)
+            request_data["conversation_id"] = cur.fetchall()[0]["conversation_id"]
+
+            query_add_message = """INSERT INTO messages(conversation_id, user_id, customer_flag, content, date)
+                                   VALUES(%(conversation_id)s, %(user_id)s, True, %(content)s, now())"""
+            cur.execute(query_add_message, request_data)
+            connection.commit()
+
+    except mysql.connector.Error as message:
+
+        return jsonify(result=message.msg), 500
+
+    else:
+        return jsonify(result="Message successfully sent."), 201
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+@app.route("/users/<user_id>/conversations", methods=["GET"])
+def get_conversations(user_id):
+    connection = None
+    cur = None
+
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        request_data = {"user_id": user_id}
+        # Making query.
+        query_get_conversations_as_customer = """SELECT conversations.conversation_id, 
+                                                 conversations.announcement_id, announcements.title,
+                                                 users.first_name FROM conversations 
+                                                 JOIN announcements ON conversations.announcement_id=
+                                                 announcements.announcement_id
+                                                 JOIN users ON announcements.seller_id=users.user_id
+                                                 WHERE conversations.user_id=%(user_id)s """
+
+        # Executing query.
+        cur.execute(query_get_conversations_as_customer, request_data)
+        conversations_as_customer = cur.fetchall()
+
+        query_get_conversations_as_seller = """SELECT conversations.conversation_id, 
+                                               conversations.announcement_id, announcements.title,
+                                               users.first_name FROM conversations
+                                               JOIN announcements ON conversations.announcement_id=
+                                               announcements.announcement_id
+                                               JOIN users ON conversations.user_id=users.user_id
+                                               WHERE announcements.seller_id=%(user_id)s """
+
+        # Executing query.
+        cur.execute(query_get_conversations_as_seller, request_data)
+        conversations_as_seller = cur.fetchall()
+
+    except mysql.connector.Error as message:
+
+        return jsonify(result=message.msg), 500
+
+    else:
+        return jsonify(as_customer=conversations_as_customer, as_seller=conversations_as_seller), 200
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
