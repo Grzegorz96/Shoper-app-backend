@@ -1,9 +1,142 @@
 from Database_connection import database_connect
 from Query_creator import create_query_for_search_engine, create_query_for_getting_messages
+from Media_validator import validation_file
+from werkzeug.utils import secure_filename
 import mysql.connector
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
+from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
+
+
+@app.route("/media/upload/<user_id>", methods=["POST"])
+def upload_media(user_id):
+    if "file" not in request.files:
+        return jsonify(result="Media not provided."), 400
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify(result="No file selected."), 400
+    if not (file and validation_file(file.filename)):
+        return jsonify(result="Unsupported media type."), 400
+
+    filename = secure_filename(file.filename)
+    path = os.path.join(os.getenv("UPLOAD_FOLDER"), user_id)
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
+    connection = None
+    cur = None
+    file_path = None
+
+    try:
+        file_path = os.path.join(path, filename)
+        file_path_object = Path(file_path)
+        if file_path_object.exists():
+            parent = str(file_path_object.parent)
+            extension = "".join(file_path_object.suffixes)
+            base = str(file_path_object.name).replace(extension, "")
+            i = 2
+            file_path = os.path.join(parent, f"{base}_{str(i)}{extension}")
+            while Path(file_path).exists():
+                i += 1
+                file_path = os.path.join(parent, f"{base}_{str(i)}{extension}")
+
+        file.save(file_path)
+
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        request_data = {
+            "main_photo_flag": int(request.headers["main-photo-flag"]),
+            "announcement_id": request.headers["announcement-id"],
+            "user_id": user_id,
+            "path": file_path
+        }
+        if request_data["main_photo_flag"]:
+            query = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
+                       VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
+        else:
+            query = """INSERT INTO announcements_media(user_id, announcement_id, path)
+                       VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
+        cur.execute(query, request_data)
+        connection.commit()
+
+    except FileNotFoundError:
+        return jsonify(result="Error during saving file, file or path doesn't exist."), 500
+
+    except mysql.connector.Error as message:
+        if Path(file_path).exists():
+            os.remove(file_path)
+        if "announcement_id_UNIQUE" in message.msg:
+            return jsonify(result="Profile picture for announcement already exists."), 409
+
+        return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+        if Path(file_path).exists():
+            os.remove(file_path)
+        return jsonify(result="Required headers: main-photo-flag <1/0>, announcement-id"), 400
+
+    else:
+        return jsonify(result="Media uploaded successfully."), 201
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+@app.route("/media/download", methods=["GET"])
+def download_media():
+    try:
+        request_data = request.get_json()
+        # return send_from_directory(app.config["UPLOAD_FOLDER"], "asdf.png", as_attachment=True)
+        return send_file(request_data["path"], as_attachment=True), 200
+
+    except FileNotFoundError:
+        return jsonify(result="File or path doesn't exist."), 400
+    
+    except (KeyError, ValueError, TypeError):
+        return jsonify(result="Required json: {path:path}."), 400
+    
+
+@app.route("/announcements/<announcement_id>/media/paths", methods=["GET"])
+def get_media_paths(announcement_id):
+    connection = None
+    cur = None
+
+    # Trying to perform a database operation.
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        # Creating request data from request body.
+        query = f"""SELECT announcements_media.path FROM announcements_media
+                    WHERE announcements_media.announcement_id={announcement_id} """
+
+        # Execute SELECT query.
+        cur.execute(query)
+
+    except mysql.connector.Error as message:
+        return jsonify(result=message.msg), 500
+
+    else:
+        return jsonify(result=cur.fetchall()), 200
+
+        # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
 
 
 @app.route("/users/register", methods=["POST"])
@@ -19,6 +152,7 @@ def register_user():
         cur = connection.cursor(dictionary=True)
         # Creating request data from request body.
         request_data = request.get_json()
+      
         # Making query.
         query = """INSERT INTO users(first_name, last_name, email, login, password, 
                    date_of_birth, street, zip_code, city, active_flag)
@@ -68,6 +202,7 @@ def login_user():
         cur = connection.cursor(dictionary=True)
         # Creating empty request_data.
         request_data = request.get_json()
+        
         # Making query.
         query = """SELECT user_id, first_name, last_name, email, login, password, date_of_birth, street, 
                    zip_code, city FROM users WHERE 
@@ -77,12 +212,12 @@ def login_user():
         # Executing query.
         cur.execute(query, request_data)
 
-        # Return details of error with 500 status code.
+        # # Return details of error with 500 status code.
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
 
         # When everything ok, returning 200 status with selected info about user in response body.
-    else:
+    else:     
         user_info = cur.fetchall()
         if user_info:
             return jsonify(result=user_info[0]), 200
@@ -110,6 +245,7 @@ def update_announcement_data(announcement_id):
         # Creating request_data.
         request_data = request.get_json()
         request_data["announcement_id"] = announcement_id
+        
         # Making query.
         query = """UPDATE announcements 
                    SET announcements.title=%(title)s, announcements.description=%(description)s,
@@ -306,7 +442,7 @@ def complete_the_announcement(announcement_id):
         request_data = {"announcement_id": announcement_id}
         # Making query.
         query = """UPDATE announcements SET completed_flag=True, active_flag=False
-                   WHERE announcements.announcement_id=%(announcement_id)s """
+                   WHERE announcements.announcement_id=%(announcement_id)s AND active_flag=True """
 
         # Executing query.
         cur.execute(query, request_data)
@@ -341,7 +477,7 @@ def restore_the_announcement(announcement_id):
         request_data = {"announcement_id": announcement_id}
         # Making query.
         query = """UPDATE announcements SET active_flag=True, completed_flag=False
-                   WHERE announcements.announcement_id=%(announcement_id)s """
+                   WHERE announcements.announcement_id=%(announcement_id)s AND completed_flag=True """
 
         # Executing query.
         cur.execute(query, request_data)
@@ -376,7 +512,7 @@ def delete_the_announcement(announcement_id):
         request_data = {"announcement_id": announcement_id}
         # Making query.
         query = """UPDATE announcements SET deleted_flag=True, completed_flag=False
-                   WHERE announcements.announcement_id=%(announcement_id)s """
+                   WHERE announcements.announcement_id=%(announcement_id)s AND completed_flag=True """
 
         # Executing query.
         cur.execute(query, request_data)
@@ -388,45 +524,6 @@ def delete_the_announcement(announcement_id):
 
     else:
         return jsonify(result="Announcement successfully deleted."), 200
-
-    # Closing connection with database and cursor if it exists.
-    finally:
-        if connection:
-            connection.close()
-            if cur:
-                cur.close()
-
-
-@app.route("/announcements", methods=["GET"])
-def get_all_announcements():
-    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
-    connection = None
-    cur = None
-
-    try:
-        # Making connection and cursor as dictionary.
-        connection = database_connect()
-        cur = connection.cursor(dictionary=True)
-        # Making query.
-        query = """ SELECT announcements.announcement_id, users.first_name,
-                    announcements.seller_id, categories.name_category, 
-                    announcements.title, announcements.description, 
-                    announcements.price, announcements.location
-                    FROM announcements 
-                    JOIN categories ON announcements.category_id=categories.category_id
-                    JOIN users ON announcements.seller_id=users.user_id
-                    WHERE announcements.active_flag=True
-                    ORDER BY announcements.announcement_id DESC """
-
-        # Executing query.
-        cur.execute(query)
-
-    except mysql.connector.Error as message:
-
-        return jsonify(result=message.msg), 500
-
-    else:
-        return jsonify(result=cur.fetchall()), 200
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -449,17 +546,17 @@ def get_user_favorite_announcements(user_id):
         # Creating request_data.
         request_data = {"user_id": user_id}
         # Making query.
-        query = f"""SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
-                    users.first_name, announcements.seller_id, announcements.title,   
-                    announcements.description, categories.name_category, announcements.price,
-                    announcements.location, announcements.active_flag
-                    FROM favorite_announcements 
-                    JOIN announcements ON favorite_announcements.announcement_id=announcements.announcement_id
-                    JOIN categories ON announcements.category_id=categories.category_id
-                    JOIN users ON announcements.seller_id=users.user_id
-                    WHERE favorite_announcements.user_id=%(user_id)s 
-                    AND (announcements.active_flag=1 OR announcements.completed_flag=1)
-                    ORDER BY favorite_announcements.favorite_announcement_id DESC"""
+        query = """SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
+                   users.first_name, announcements.seller_id, announcements.title,   
+                   announcements.description, categories.name_category, announcements.price,
+                   announcements.location, announcements.active_flag
+                   FROM favorite_announcements 
+                   JOIN announcements ON favorite_announcements.announcement_id=announcements.announcement_id
+                   JOIN categories ON announcements.category_id=categories.category_id
+                   JOIN users ON announcements.seller_id=users.user_id
+                   WHERE favorite_announcements.user_id=%(user_id)s 
+                   AND (announcements.active_flag=1 OR announcements.completed_flag=1)
+                   ORDER BY favorite_announcements.favorite_announcement_id DESC"""
 
         # Executing query.
         cur.execute(query, request_data)
@@ -560,9 +657,7 @@ def delete_announcement_from_favorite(favorite_announcement_id):
 
 
 @app.route("/announcements/search", methods=["GET"])
-def get_announcements_by_search_engine():
-    categories = ["Elektronika", "Do domu", "Do ogrodu", "Sport i turystyka", "Motoryzacja", "Zdrowie i uroda",
-                  "Dla dzieci", "Rolnictwo", "Nieruchomości", "Moda", "Kultura i rozrywka", "Oddam za darmo"]
+def get_announcements():
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
@@ -571,31 +666,35 @@ def get_announcements_by_search_engine():
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        content_to_search = request.args.get("q")
-        location = request.args.get("l")
-        category = request.args.get("c")
+
         # Making query.
         query = """ SELECT announcements.announcement_id, users.first_name,
                     announcements.seller_id, categories.name_category,
                     announcements.title, announcements.description, 
-                    announcements.price, announcements.location
+                    announcements.price, announcements.location, announcements_main_photo.path AS main_photo
                     FROM announcements 
                     JOIN categories ON announcements.category_id=categories.category_id
                     JOIN users ON announcements.seller_id=users.user_id
+                    LEFT JOIN announcements_main_photo
+                    ON announcements.announcement_id=announcements_main_photo.announcement_id
                     WHERE announcements.active_flag=True """
 
-        if content_to_search is not None:
+        content_to_search = request.args.get("q")
+        location = request.args.get("l")
+        category = request.args.get("c")
+       
+        if content_to_search:
             # Init query for search field
             query = create_query_for_search_engine(content_to_search, query, "announcements.title")
-        if location is not None:
+        if location:
             # Init query for location field
             query = create_query_for_search_engine(location, query, "announcements.location")
         # Init query for category id
-        if category in categories:
-            category_id = categories.index(category) + 1
-            query += f"""AND categories.category_id={category_id} """
+        if category:
+            query += f"""AND categories.category_id={category} """
 
         query += "ORDER BY announcements.announcement_id DESC"
+        
         # Executing query.
         cur.execute(query)
 
@@ -673,7 +772,7 @@ def send_message(user_id):
 
         if "conversation_id" in request_data:
             query = """INSERT INTO messages(conversation_id, user_id, customer_flag, content, date)
-                       VALUES(%(conversation_id)s, %(user_id)s, %(is_user_customer)s, %(content)s, now())"""
+                       VALUES(%(conversation_id)s, %(user_id)s, %(customer_flag)s, %(content)s, now())"""
 
             cur.execute(query, request_data)
             connection.commit()
@@ -690,7 +789,7 @@ def send_message(user_id):
             request_data["conversation_id"] = cur.fetchall()[0]["conversation_id"]
 
             query_add_message = """INSERT INTO messages(conversation_id, user_id, customer_flag, content, date)
-                                   VALUES(%(conversation_id)s, %(user_id)s, True, %(content)s, now())"""
+                                   VALUES(%(conversation_id)s, %(user_id)s, %(customer_flag)s, %(content)s, now())"""
             cur.execute(query_add_message, request_data)
             connection.commit()
 
@@ -726,7 +825,10 @@ def get_conversations(user_id):
                                                  JOIN announcements ON conversations.announcement_id=
                                                  announcements.announcement_id
                                                  JOIN users ON announcements.seller_id=users.user_id
-                                                 WHERE conversations.user_id=%(user_id)s """
+                                                 WHERE conversations.user_id=%(user_id)s 
+                                                 AND (announcements.active_flag=1 OR 
+                                                 announcements.completed_flag=1)
+                                                 ORDER BY conversations.conversation_id DESC"""
 
         # Executing query.
         cur.execute(query_get_conversations_as_customer, request_data)
@@ -738,7 +840,10 @@ def get_conversations(user_id):
                                                JOIN announcements ON conversations.announcement_id=
                                                announcements.announcement_id
                                                JOIN users ON conversations.user_id=users.user_id
-                                               WHERE announcements.seller_id=%(user_id)s """
+                                               WHERE announcements.seller_id=%(user_id)s
+                                               AND (announcements.active_flag=1 
+                                               OR announcements.completed_flag=1)
+                                               ORDER BY conversations.conversation_id DESC"""
 
         # Executing query.
         cur.execute(query_get_conversations_as_seller, request_data)
