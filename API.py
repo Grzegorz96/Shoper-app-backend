@@ -42,6 +42,7 @@ def upload_media(user_id):
             parent = str(file_path_object.parent)
             extension = "".join(file_path_object.suffixes)
             base = str(file_path_object.name).replace(extension, "")
+
             i = 2
             file_path = os.path.join(parent, f"{base}_{str(i)}{extension}")
             while Path(file_path).exists():
@@ -58,12 +59,14 @@ def upload_media(user_id):
             "user_id": user_id,
             "path": file_path
         }
+
         if request_data["main_photo_flag"]:
             query = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
                        VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
         else:
             query = """INSERT INTO announcements_media(user_id, announcement_id, path)
                        VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
+
         cur.execute(query, request_data)
         connection.commit()
 
@@ -81,7 +84,7 @@ def upload_media(user_id):
     except (KeyError, ValueError, TypeError):
         if Path(file_path).exists():
             os.remove(file_path)
-        return jsonify(result="Required headers: main-photo-flag <1/0>, announcement-id"), 400
+        return jsonify(result="Required headers: main-photo-flag <1/0>, announcement-id."), 400
 
     else:
         return jsonify(result="Media uploaded successfully."), 201
@@ -281,26 +284,43 @@ def get_user_announcements(user_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
         # Creating request_data.
-        request_data = {"user_id": user_id}
-        # Making query.
-        query = """SELECT announcements.announcement_id, users.first_name, 
-                   announcements.seller_id, categories.name_category,  
-                   announcements.category_id, announcements.title,
-                   announcements.description, announcements.price, announcements.location,
-                   announcements.active_flag
-                   FROM announcements 
-                   JOIN categories ON announcements.category_id=categories.category_id
-                   JOIN users ON announcements.seller_id=users.user_id
-                   WHERE announcements.seller_id=%(user_id)s 
-                   AND (announcements.active_flag=True OR announcements.completed_flag=True)
-                   ORDER BY announcements.announcement_id DESC
-                   LIMIT 16"""
+        field = request.args.get("field")
+        per_page = int(request.args.get("per_page"))
+        page = int(request.args.get("page"))
 
+        offset = (page*per_page) - per_page
+
+        request_data = {
+            "user_id": user_id,
+            "per_page": per_page,
+            "offset": offset
+        }
+         
+        # Making query.
+        query = f"""SELECT announcements.announcement_id, users.first_name, 
+                    announcements.seller_id, categories.name_category,  
+                    announcements.category_id, announcements.title,
+                    announcements.description, announcements.price, announcements.location,
+                    announcements_main_photo.path AS main_photo
+                    FROM announcements 
+                    JOIN categories ON announcements.category_id=categories.category_id
+                    JOIN users ON announcements.seller_id=users.user_id
+                    LEFT JOIN announcements_main_photo
+                    ON announcements.announcement_id=announcements_main_photo.announcement_id
+                    WHERE announcements.seller_id=%(user_id)s 
+                    AND announcements.{field}=True
+                    ORDER BY announcements.announcement_id DESC
+                    LIMIT %(per_page)s OFFSET %(offset)s """
+        
         # Executing query.
         cur.execute(query, request_data)
-
+        
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+    
+        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int&field=str."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -544,26 +564,43 @@ def get_user_favorite_announcements(user_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
         # Creating request_data.
-        request_data = {"user_id": user_id}
+        field = request.args.get("field")
+        per_page = int(request.args.get("per_page"))
+        page = int(request.args.get("page"))
+
+        offset = (page*per_page) - per_page
+
+        request_data = {
+            "user_id": user_id,
+            "per_page": per_page,
+            "offset": offset
+        }
+        
         # Making query.
-        query = """SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
-                   users.first_name, announcements.seller_id, announcements.title,   
-                   announcements.description, categories.name_category, announcements.price,
-                   announcements.location, announcements.active_flag
-                   FROM favorite_announcements 
-                   JOIN announcements ON favorite_announcements.announcement_id=announcements.announcement_id
-                   JOIN categories ON announcements.category_id=categories.category_id
-                   JOIN users ON announcements.seller_id=users.user_id
-                   WHERE favorite_announcements.user_id=%(user_id)s 
-                   AND (announcements.active_flag=1 OR announcements.completed_flag=1)
-                   ORDER BY favorite_announcements.favorite_announcement_id DESC"""
+        query = f"""SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
+                    users.first_name, announcements.seller_id, announcements.title,   
+                    announcements.description, categories.name_category, announcements.price,
+                    announcements.location, announcements_main_photo.path AS main_photo
+                    FROM favorite_announcements 
+                    JOIN announcements ON favorite_announcements.announcement_id=announcements.announcement_id
+                    JOIN categories ON announcements.category_id=categories.category_id
+                    JOIN users ON announcements.seller_id=users.user_id
+                    LEFT JOIN announcements_main_photo 
+                    ON announcements.announcement_id=announcements_main_photo.announcement_id
+                    WHERE favorite_announcements.user_id=%(user_id)s 
+                    AND announcements.{field}=True
+                    ORDER BY favorite_announcements.favorite_announcement_id DESC
+                    LIMIT %(per_page)s OFFSET %(offset)s """
 
         # Executing query.
         cur.execute(query, request_data)
 
     except mysql.connector.Error as message:
-
         return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+    
+        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int&field=str."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -669,7 +706,7 @@ def get_announcements():
 
         # Making query.
         query = """ SELECT announcements.announcement_id, users.first_name,
-                    announcements.seller_id, categories.name_category,
+                    announcements.seller_id, categories.name_category, announcements.category_id,
                     announcements.title, announcements.description, 
                     announcements.price, announcements.location, announcements_main_photo.path AS main_photo
                     FROM announcements 
@@ -679,6 +716,9 @@ def get_announcements():
                     ON announcements.announcement_id=announcements_main_photo.announcement_id
                     WHERE announcements.active_flag=True """
 
+        per_page = int(request.args.get("per_page"))
+        page = int(request.args.get("page"))
+        offset = (page*per_page) - per_page
         content_to_search = request.args.get("q")
         location = request.args.get("l")
         category = request.args.get("c")
@@ -693,7 +733,8 @@ def get_announcements():
         if category:
             query += f"""AND categories.category_id={category} """
 
-        query += "ORDER BY announcements.announcement_id DESC"
+        query += f"""ORDER BY announcements.announcement_id DESC
+                     LIMIT {per_page} OFFSET {offset}"""
         
         # Executing query.
         cur.execute(query)
@@ -701,6 +742,11 @@ def get_announcements():
     except mysql.connector.Error as message:
 
         return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+    
+        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int."
+                              " Optional parameters: /?q=str&l=str&c=int."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -817,44 +863,47 @@ def get_conversations(user_id):
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        request_data = {"user_id": user_id}
+
+        on_field = request.args.get("on_field")
+        where_field = request.args.get("where_field")
+        per_page = int(request.args.get("per_page"))
+        page = int(request.args.get("page"))
+
+        offset = (page*per_page) - per_page
+
+        request_data = {
+            "user_id": user_id,
+            "per_page": per_page,
+            "offset": offset
+        }
+        
         # Making query.
-        query_get_conversations_as_customer = """SELECT conversations.conversation_id, 
-                                                 conversations.announcement_id, announcements.title,
-                                                 users.first_name FROM conversations 
-                                                 JOIN announcements ON conversations.announcement_id=
-                                                 announcements.announcement_id
-                                                 JOIN users ON announcements.seller_id=users.user_id
-                                                 WHERE conversations.user_id=%(user_id)s 
-                                                 AND (announcements.active_flag=1 OR 
-                                                 announcements.completed_flag=1)
-                                                 ORDER BY conversations.conversation_id DESC"""
+        query = f"""SELECT conversations.conversation_id, 
+                    conversations.announcement_id, announcements.title,
+                    users.first_name FROM conversations 
+                    JOIN announcements ON conversations.announcement_id=
+                    announcements.announcement_id
+                    JOIN users ON {on_field}=users.user_id
+                    WHERE {where_field}=%(user_id)s 
+                    AND (announcements.active_flag=True OR 
+                    announcements.completed_flag=True)
+                    ORDER BY conversations.conversation_id DESC
+                    LIMIT %(per_page)s OFFSET %(offset)s """ 
 
         # Executing query.
-        cur.execute(query_get_conversations_as_customer, request_data)
-        conversations_as_customer = cur.fetchall()
-
-        query_get_conversations_as_seller = """SELECT conversations.conversation_id, 
-                                               conversations.announcement_id, announcements.title,
-                                               users.first_name FROM conversations
-                                               JOIN announcements ON conversations.announcement_id=
-                                               announcements.announcement_id
-                                               JOIN users ON conversations.user_id=users.user_id
-                                               WHERE announcements.seller_id=%(user_id)s
-                                               AND (announcements.active_flag=1 
-                                               OR announcements.completed_flag=1)
-                                               ORDER BY conversations.conversation_id DESC"""
-
-        # Executing query.
-        cur.execute(query_get_conversations_as_seller, request_data)
-        conversations_as_seller = cur.fetchall()
-
+        cur.execute(query, request_data)
+       
     except mysql.connector.Error as message:
 
         return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+    
+        return jsonify(result="Bad parameters. Required parameters:"
+                              " /?page=int&per_page=int&on_field=str&where_field=str."), 400
 
     else:
-        return jsonify(as_customer=conversations_as_customer, as_seller=conversations_as_seller), 200
+        return jsonify(result=cur.fetchall()), 200
 
     # Closing connection with database and cursor if it exists.
     finally:
