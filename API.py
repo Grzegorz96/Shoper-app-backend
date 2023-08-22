@@ -36,6 +36,14 @@ def upload_media(user_id):
     file_path = None
 
     try:
+        main_photo_flag = int(request.args.get("main_photo_flag"))
+        if not (main_photo_flag == 1 or main_photo_flag == 0):
+            raise ValueError
+
+        announcement_id = int(request.args.get("announcement_id"))
+        if not announcement_id > 0:
+            raise ValueError
+
         file_path = os.path.join(path, filename)
         file_path_object = Path(file_path)
         if file_path_object.exists():
@@ -53,14 +61,14 @@ def upload_media(user_id):
 
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
+
         request_data = {
-            "main_photo_flag": int(request.headers["main-photo-flag"]),
-            "announcement_id": request.headers["announcement-id"],
+            "announcement_id": announcement_id,
             "user_id": user_id,
             "path": file_path
         }
 
-        if request_data["main_photo_flag"]:
+        if main_photo_flag:
             query = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
                        VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
         else:
@@ -84,7 +92,8 @@ def upload_media(user_id):
     except (KeyError, ValueError, TypeError):
         if Path(file_path).exists():
             os.remove(file_path)
-        return jsonify(result="Required headers: main-photo-flag <1/0>, announcement-id."), 400
+
+        return jsonify(result="Bad parameters. Required parameters: /?announcement_id=int:>0&main_photo_flag=int:1/0."), 400
 
     else:
         return jsonify(result="Media uploaded successfully."), 201
@@ -284,9 +293,15 @@ def get_user_announcements(user_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
         # Creating request_data.
-        field = request.args.get("field")
+        active_flag = int(request.args.get("active_flag"))
+        if not (active_flag == 0 or active_flag == 1):
+            raise ValueError
         per_page = int(request.args.get("per_page"))
+        if not per_page > 0:
+            raise ValueError
         page = int(request.args.get("page"))
+        if not page > 0:
+            raise ValueError
 
         offset = (page*per_page) - per_page
 
@@ -295,7 +310,12 @@ def get_user_announcements(user_id):
             "per_page": per_page,
             "offset": offset
         }
-         
+        
+        if active_flag:
+            field = "active_flag"
+        else:
+            field = "completed_flag"
+    
         # Making query.
         query = f"""SELECT announcements.announcement_id, users.first_name, 
                     announcements.seller_id, categories.name_category,  
@@ -314,13 +334,13 @@ def get_user_announcements(user_id):
         
         # Executing query.
         cur.execute(query, request_data)
-        
+
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int&field=str."), 400
+        return jsonify(result="Bad parameters. Required parameters: /?page=in:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -564,9 +584,15 @@ def get_user_favorite_announcements(user_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
         # Creating request_data.
-        field = request.args.get("field")
+        active_flag = int(request.args.get("active_flag"))
+        if not (active_flag == 0 or active_flag == 1):
+            raise ValueError
         per_page = int(request.args.get("per_page"))
+        if not per_page > 0:
+            raise ValueError
         page = int(request.args.get("page"))
+        if not page > 0:
+            raise ValueError
 
         offset = (page*per_page) - per_page
 
@@ -575,7 +601,12 @@ def get_user_favorite_announcements(user_id):
             "per_page": per_page,
             "offset": offset
         }
-        
+
+        if active_flag:
+            field = "active_flag"
+        else:
+            field = "completed_flag"
+      
         # Making query.
         query = f"""SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
                     users.first_name, announcements.seller_id, announcements.title,   
@@ -591,7 +622,7 @@ def get_user_favorite_announcements(user_id):
                     AND announcements.{field}=True
                     ORDER BY favorite_announcements.favorite_announcement_id DESC
                     LIMIT %(per_page)s OFFSET %(offset)s """
-
+        
         # Executing query.
         cur.execute(query, request_data)
 
@@ -600,7 +631,7 @@ def get_user_favorite_announcements(user_id):
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int&field=str."), 400
+        return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -717,8 +748,14 @@ def get_announcements():
                     WHERE announcements.active_flag=True """
 
         per_page = int(request.args.get("per_page"))
+        if not per_page > 0:
+            raise ValueError
         page = int(request.args.get("page"))
+        if not page > 0:
+            raise ValueError
+        
         offset = (page*per_page) - per_page
+
         content_to_search = request.args.get("q")
         location = request.args.get("l")
         category = request.args.get("c")
@@ -745,8 +782,8 @@ def get_announcements():
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=int&per_page=int."
-                              " Optional parameters: /?q=str&l=str&c=int."), 400
+        return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0."
+                              " Optional parameters: /?q=str&l=str&c=int:1/12."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -864,10 +901,15 @@ def get_conversations(user_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
 
-        on_field = request.args.get("on_field")
-        where_field = request.args.get("where_field")
+        customer_flag = int(request.args.get("customer_flag"))
+        if not (customer_flag == 0 or customer_flag == 1):
+            raise ValueError 
         per_page = int(request.args.get("per_page"))
+        if not per_page > 0:
+            raise ValueError
         page = int(request.args.get("page"))
+        if not page > 0:
+            raise ValueError
 
         offset = (page*per_page) - per_page
 
@@ -876,6 +918,13 @@ def get_conversations(user_id):
             "per_page": per_page,
             "offset": offset
         }
+
+        if customer_flag:
+            on_field = "announcements.seller_id"
+            where_field = "conversations.user_id"
+        else:
+            on_field = "conversations.user_id"
+            where_field = "announcements.seller_id"
         
         # Making query.
         query = f"""SELECT conversations.conversation_id, 
@@ -889,7 +938,7 @@ def get_conversations(user_id):
                     announcements.completed_flag=True)
                     ORDER BY conversations.conversation_id DESC
                     LIMIT %(per_page)s OFFSET %(offset)s """ 
-
+        
         # Executing query.
         cur.execute(query, request_data)
        
@@ -899,8 +948,7 @@ def get_conversations(user_id):
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters:"
-                              " /?page=int&per_page=int&on_field=str&where_field=str."), 400
+        return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0&customer_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
