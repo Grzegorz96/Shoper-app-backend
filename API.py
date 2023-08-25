@@ -93,7 +93,8 @@ def upload_media(user_id):
         if Path(file_path).exists():
             os.remove(file_path)
 
-        return jsonify(result="Bad parameters. Required parameters: /?announcement_id=int:>0&main_photo_flag=int:1/0."), 400
+        return jsonify(result="Bad parameters. Required parameters: "
+                              "/?announcement_id=int:>0&main_photo_flag=int:1/0."), 400
 
     else:
         return jsonify(result="Media uploaded successfully."), 201
@@ -130,15 +131,28 @@ def get_media_paths(announcement_id):
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        # Creating request data from request body.
-        query = f"""SELECT announcements_media.path FROM announcements_media
-                    WHERE announcements_media.announcement_id={announcement_id} """
+        
+        main_photo_flag = int(request.args.get("main_photo_flag"))
+        if not (main_photo_flag == 1 or main_photo_flag == 0):
+            raise ValueError
+
+        if main_photo_flag:
+            query = f"""SELECT announcements_main_photo.path FROM announcements_main_photo
+                        WHERE announcements_main_photo.announcement_id={announcement_id} """
+
+        else:
+            query = f"""SELECT announcements_media.path FROM announcements_media
+                        WHERE announcements_media.announcement_id={announcement_id} """
 
         # Execute SELECT query.
         cur.execute(query)
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
+    
+    except (KeyError, ValueError, TypeError):
+    
+        return jsonify(result="Bad parameter. Required parameter: /?main_photo_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -340,7 +354,8 @@ def get_user_announcements(user_id):
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=in:>0&per_page=int:>0&active_flag=int:1/0."), 400
+        return jsonify(result="Bad parameters. Required parameters: "
+                              "/?page=in:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -381,7 +396,7 @@ def add_announcement(user_id):
         return jsonify(result=message.msg), 500
 
     else:
-        return jsonify(result="Announcement added successfully."), 201
+        return jsonify(result={"announcement_id": cur.lastrowid}), 201
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -631,7 +646,8 @@ def get_user_favorite_announcements(user_id):
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0&active_flag=int:1/0."), 400
+        return jsonify(result="Bad parameters. Required parameters: "
+                              "/?page=int:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
@@ -948,7 +964,8 @@ def get_conversations(user_id):
     
     except (KeyError, ValueError, TypeError):
     
-        return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0&customer_flag=int:1/0."), 400
+        return jsonify(result="Bad parameters. Required parameters:"
+                              " /?page=int:>0&per_page=int:>0&customer_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
