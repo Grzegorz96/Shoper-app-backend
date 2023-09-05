@@ -5,9 +5,9 @@ from werkzeug.utils import secure_filename
 import mysql.connector
 from flask import Flask, jsonify, request, send_file
 from pathlib import Path
+from re import match
 import os
 from dotenv import load_dotenv
-
 
 load_dotenv()
 app = Flask(__name__)
@@ -88,7 +88,7 @@ def upload_media(user_id):
             return jsonify(result="Profile picture for announcement already exists."), 409
 
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
         if Path(file_path).exists():
             os.remove(file_path)
@@ -116,12 +116,12 @@ def download_media():
 
     except FileNotFoundError:
         return jsonify(result="File or path doesn't exist."), 400
-    
+
     except (KeyError, ValueError, TypeError):
         return jsonify(result="Required json: {path:path}."), 400
-    
 
-@app.route("/announcements/<announcement_id>/media/paths", methods=["GET"])
+
+@app.route("/announcements/<int:announcement_id>/media/paths", methods=["GET"])
 def get_media_paths(announcement_id):
     connection = None
     cur = None
@@ -131,7 +131,6 @@ def get_media_paths(announcement_id):
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        
         main_photo_flag = int(request.args.get("main_photo_flag"))
         if not (main_photo_flag == 1 or main_photo_flag == 0):
             raise ValueError
@@ -149,15 +148,126 @@ def get_media_paths(announcement_id):
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
-    
+
         return jsonify(result="Bad parameter. Required parameter: /?main_photo_flag=int:1/0."), 400
 
     else:
         return jsonify(result=cur.fetchall()), 200
 
         # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+@app.route("/media/delete", methods=["DELETE"])
+def delete_media():
+    connection = None
+    cur = None
+    try:
+        main_photo_flag = int(request.args.get("main_photo_flag"))
+        if not (main_photo_flag == 1 or main_photo_flag == 0):
+            raise ValueError
+
+        path = request.args.get("path")
+
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        request_data = {"path": path}
+
+        if main_photo_flag:
+            query = """DELETE FROM announcements_main_photo
+                       WHERE announcements_main_photo.path=%(path)s"""
+
+        else:
+            query = """DELETE FROM announcements_media
+                       WHERE announcements_media.path=%(path)s"""
+
+        # Execute SELECT query.
+        cur.execute(query, request_data)
+
+        if os.path.exists(path):
+            os.remove(path)
+            connection.commit()
+        else:
+            raise FileNotFoundError
+
+    except mysql.connector.Error as message:
+        return jsonify(result=message.msg), 500
+
+    except (KeyError, ValueError, TypeError):
+
+        return jsonify(result="Bad parameter. Required parameter: /?main_photo_flag=int:1/0."), 400
+
+    except FileNotFoundError:
+        return jsonify(result="File doesn't exist."), 404
+
+    else:
+        return jsonify(result="successful deletion"), 200
+
+    # Closing connection with database and cursor if it exists.
+    finally:
+        if connection:
+            connection.close()
+            if cur:
+                cur.close()
+
+
+@app.route("/media/switch/<int:user_id>", methods=["PUT"])
+def switch_media(user_id):
+    connection = None
+    cur = None
+    # Trying to perform a database operation.
+    try:
+        # Making connection and cursor as dictionary.
+        connection = database_connect()
+        cur = connection.cursor(dictionary=True)
+        # Creating request data from request body.
+        request_data = request.get_json()
+        request_data["user_id"] = user_id
+
+        to_media_flag = int(request.args.get("to_media_flag"))
+        if not (to_media_flag == 1 or to_media_flag == 0):
+            raise ValueError
+
+        to_main_flag = int(request.args.get("to_main_flag"))
+        if not (to_main_flag == 1 or to_main_flag == 0):
+            raise ValueError
+
+        if to_media_flag:
+            query_delete_main = """DELETE FROM announcements_main_photo
+                                    WHERE announcements_main_photo.path=%(main_photo_path)s"""
+            cur.execute(query_delete_main, request_data)
+            query_add_media = """INSERT INTO announcements_media(user_id, announcement_id, path)
+                                 VALUES(%(user_id)s, %(announcement_id)s, %(main_photo_path)s)"""
+            cur.execute(query_add_media, request_data)
+
+        if to_main_flag:
+            query_delete_media = """DELETE FROM announcements_media
+                                    WHERE announcements_media.path=%(media_photo_path)s"""
+            cur.execute(query_delete_media, request_data)
+            query_add_main = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
+                                VALUES(%(user_id)s, %(announcement_id)s, %(media_photo_path)s)"""
+            cur.execute(query_add_main, request_data)
+
+        connection.commit()
+
+    except mysql.connector.Error as message:
+        return jsonify(result=message.msg), 500
+
+    except (KeyError, ValueError, TypeError):
+
+        return jsonify(result="Bad parameters. Required parameters: /?to_main_flag=int:1/0&to_media_flag=int:1/0."), 400
+
+    else:
+        return jsonify(result="successful operation"), 200
+
+    # Closing connection with database and cursor if it exists.
     finally:
         if connection:
             connection.close()
@@ -178,12 +288,21 @@ def register_user():
         cur = connection.cursor(dictionary=True)
         # Creating request data from request body.
         request_data = request.get_json()
-      
+
+        if (not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{2,45}$", request_data["first_name"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{2,45}$", request_data["last_name"])
+                or not match("^([A-Za-z0-9]+|[A-Za-z0-9][A-Za-z0-9._-]+[A-Za-z0-9])@([A-Za-z0-9]+"
+                             "|[A-Za-z0-9._-]+[A-Za-z0-9])\.[A-Za-z0-9]+$", request_data["email"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń0-9]{5,45}$", request_data["login"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń0-9!@#$%^&*]{7,45}$", request_data["password"])
+                or not match("^[0-9A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń-]{10,20}$", request_data["date_of_birth"])):
+            raise ValueError
+
         # Making query.
-        query = """INSERT INTO users(first_name, last_name, email, login, password, 
-                   date_of_birth, street, zip_code, city, active_flag)
-                   VALUES(%(first_name)s, %(last_name)s, %(email)s, %(login)s, %(password)s, %(date_of_birth)s, 
-                   %(street)s, %(zip_code)s, %(city)s, True)"""
+        query = """INSERT INTO users(first_name, last_name, email, login, password,
+                   date_of_birth, street, zip_code, city, active_flag, creation_account_date)
+                   VALUES(%(first_name)s, %(last_name)s, %(email)s, %(login)s, %(password)s, %(date_of_birth)s,
+                   %(street)s, %(zip_code)s, %(city)s, True, now())"""
         # Execute SELECT query.
         cur.execute(query, request_data)
         connection.commit()
@@ -204,6 +323,8 @@ def register_user():
         else:
             return jsonify(result=message.msg), 500
 
+    except (ValueError, TypeError, KeyError):
+        return jsonify(result="invalid input data."), 400
     # If it succeeds, returning 201 status code.
     else:
         return jsonify(result="User successfully created."), 201
@@ -228,10 +349,10 @@ def login_user():
         cur = connection.cursor(dictionary=True)
         # Creating empty request_data.
         request_data = request.get_json()
-        
+
         # Making query.
         query = """SELECT user_id, first_name, last_name, email, login, password, date_of_birth, street, 
-                   zip_code, city FROM users WHERE 
+                   zip_code, city, creation_account_date FROM users WHERE 
                    ((login=%(login_or_email)s AND password=%(password)s) OR (email=%(login_or_email)s 
                    AND password=%(password)s)) AND users.active_flag=True"""
 
@@ -243,9 +364,11 @@ def login_user():
         return jsonify(result=message.msg), 500
 
         # When everything ok, returning 200 status with selected info about user in response body.
-    else:     
+    else:
         user_info = cur.fetchall()
         if user_info:
+            for user in user_info:
+                user["creation_account_date"] = str(user["creation_account_date"])
             return jsonify(result=user_info[0]), 200
         else:
             return jsonify(result="The user does not exist in the database."), 400
@@ -258,7 +381,7 @@ def login_user():
                 cur.close()
 
 
-@app.route("/announcements/<announcement_id>", methods=["PUT"])
+@app.route("/announcements/<int:announcement_id>", methods=["PUT"])
 def update_announcement_data(announcement_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -271,11 +394,21 @@ def update_announcement_data(announcement_id):
         # Creating request_data.
         request_data = request.get_json()
         request_data["announcement_id"] = announcement_id
-        
+
+        if (not match("^.{10,45}$", request_data["title"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń ]{3,45}$", request_data["location"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{4,10}$", request_data["state"])
+                or not (request_data["mobile_number"] is None or match("^[+]?[0-9]{6,14}$",
+                                                                       request_data["mobile_number"]))
+                or not (80 <= len(request_data["description"]) <= 400)
+                or not (0 <= request_data["price"] <= 9999999)):
+            raise ValueError
+
         # Making query.
-        query = """UPDATE announcements 
+        query = """UPDATE announcements
                    SET announcements.title=%(title)s, announcements.description=%(description)s,
-                   announcements.price=%(price)s, announcements.location=%(location)s
+                   announcements.price=%(price)s, announcements.location=%(location)s,
+                   announcements.state=%(state)s, announcements.mobile_number=%(mobile_number)s
                    WHERE announcements.announcement_id=%(announcement_id)s """
 
         # Executing query.
@@ -284,6 +417,9 @@ def update_announcement_data(announcement_id):
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
+
+    except (ValueError, TypeError, KeyError):
+        return jsonify(result="invalid input data."), 400
 
     else:
         return jsonify(result="Announcement successfully updated."), 200
@@ -296,7 +432,7 @@ def update_announcement_data(announcement_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/announcements", methods=["GET"])
+@app.route("/users/<int:user_id>/announcements", methods=["GET"])
 def get_user_announcements(user_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -317,25 +453,26 @@ def get_user_announcements(user_id):
         if not page > 0:
             raise ValueError
 
-        offset = (page*per_page) - per_page
+        offset = (page * per_page) - per_page
 
         request_data = {
             "user_id": user_id,
             "per_page": per_page,
             "offset": offset
         }
-        
+
         if active_flag:
             field = "active_flag"
         else:
             field = "completed_flag"
-    
+
         # Making query.
         query = f"""SELECT announcements.announcement_id, users.first_name, 
                     announcements.seller_id, categories.name_category,  
                     announcements.category_id, announcements.title,
                     announcements.description, announcements.price, announcements.location,
-                    announcements_main_photo.path AS main_photo
+                    announcements_main_photo.path AS main_photo, announcements.state,
+                    announcements.creation_date, announcements.mobile_number
                     FROM announcements 
                     JOIN categories ON announcements.category_id=categories.category_id
                     JOIN users ON announcements.seller_id=users.user_id
@@ -345,20 +482,24 @@ def get_user_announcements(user_id):
                     AND announcements.{field}=True
                     ORDER BY announcements.announcement_id DESC
                     LIMIT %(per_page)s OFFSET %(offset)s """
-        
+
         # Executing query.
         cur.execute(query, request_data)
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
-    
+
         return jsonify(result="Bad parameters. Required parameters: "
                               "/?page=in:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
-        return jsonify(result=cur.fetchall()), 200
+        user_announcements = cur.fetchall()
+        for announcement in user_announcements:
+            announcement["creation_date"] = str(announcement["creation_date"])
+
+        return jsonify(result=user_announcements), 200
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -368,7 +509,7 @@ def get_user_announcements(user_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/announcements", methods=["POST"])
+@app.route("/users/<int:user_id>/announcements", methods=["POST"])
 def add_announcement(user_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -382,11 +523,21 @@ def add_announcement(user_id):
         request_data = request.get_json()
         request_data["user_id"] = user_id
 
+        if (not match("^.{10,45}$", request_data["title"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń ]{3,45}$", request_data["location"])
+                or not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{4,10}$", request_data["state"])
+                or not (request_data["mobile_number"] is None or match("^[+]?[0-9]{6,14}$",
+                                                                       request_data["mobile_number"]))
+                or not (80 <= len(request_data["description"]) <= 400)
+                or not (0 <= request_data["price"] <= 9999999)
+                or not (1 <= request_data["category_id"] <= 12)):
+            raise ValueError
+
         # Making query.
         query = """INSERT INTO announcements(seller_id, category_id, title, description, price,
-                   location, active_flag, completed_flag, deleted_flag)
-                   VALUES(%(user_id)s, %(category_id)s, %(title)s,
-                   %(description)s, %(price)s, %(location)s, True, False, False)"""
+                   location, active_flag, completed_flag, deleted_flag, state, creation_date, mobile_number)
+                   VALUES(%(user_id)s, %(category_id)s, %(title)s, %(description)s, %(price)s, %(location)s,
+                   True, False, False, %(state)s, now(), %(mobile_number)s)"""
 
         # Executing query.
         cur.execute(query, request_data)
@@ -394,6 +545,9 @@ def add_announcement(user_id):
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
+
+    except (ValueError, TypeError, KeyError):
+        return jsonify(result="invalid input data."), 400
 
     else:
         return jsonify(result={"announcement_id": cur.lastrowid}), 201
@@ -443,7 +597,7 @@ def varify_login():
                 cur.close()
 
 
-@app.route("/users/<user_id>", methods=["PATCH"])
+@app.route("/users/<int:user_id>", methods=["PATCH"])
 def update_user_data(user_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -456,6 +610,24 @@ def update_user_data(user_id):
         # Creating request_data.
         request_data = request.get_json()
         request_data["user_id"] = user_id
+
+        if not request_data["column"] in ("first_name", "last_name", "email", "password", "street", "zip_code", "city"):
+            raise ValueError
+
+        if request_data["column"] == "first_name":
+            if not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{2,45}$", request_data["value"]):
+                raise ValueError
+        elif request_data["column"] == "last_name":
+            if not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń]{2,45}$", request_data["value"]):
+                raise ValueError
+        elif request_data["column"] == "email":
+            if not match("^([A-Za-z0-9]+|[A-Za-z0-9][A-Za-z0-9._-]+[A-Za-z0-9])@([A-Za-z0-9]+"
+                         "|[A-Za-z0-9._-]+[A-Za-z0-9])\.[A-Za-z0-9]+$", request_data["value"]):
+                raise ValueError
+        elif request_data["column"] == "password":
+            if not match("^[A-ZĘÓĄŚŁŻŹĆŃa-zęóąśłżźćń0-9!@#$%^&*]{7,45}$", request_data["value"]):
+                raise ValueError
+
         # Making query.
         query = f"""UPDATE users SET {request_data["column"]}=%(value)s
                     WHERE user_id=%(user_id)s AND active_flag=True """
@@ -472,6 +644,9 @@ def update_user_data(user_id):
         else:
             return jsonify(result=message.msg), 500
 
+    except (ValueError, TypeError, KeyError):
+        return jsonify(result="invalid input data."), 400
+
     else:
         return jsonify(result="User successfully updated."), 200
 
@@ -483,7 +658,7 @@ def update_user_data(user_id):
                 cur.close()
 
 
-@app.route("/announcements/<announcement_id>/complete", methods=["PATCH"])
+@app.route("/announcements/<int:announcement_id>/complete", methods=["PATCH"])
 def complete_the_announcement(announcement_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -518,7 +693,7 @@ def complete_the_announcement(announcement_id):
                 cur.close()
 
 
-@app.route("/announcements/<announcement_id>/restore", methods=["PATCH"])
+@app.route("/announcements/<int:announcement_id>/restore", methods=["PATCH"])
 def restore_the_announcement(announcement_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -553,7 +728,7 @@ def restore_the_announcement(announcement_id):
                 cur.close()
 
 
-@app.route("/announcements/<announcement_id>/delete", methods=["PATCH"])
+@app.route("/announcements/<int:announcement_id>/delete", methods=["PATCH"])
 def delete_the_announcement(announcement_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -588,7 +763,7 @@ def delete_the_announcement(announcement_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/favorite-announcements", methods=["GET"])
+@app.route("/users/<int:user_id>/favorite-announcements", methods=["GET"])
 def get_user_favorite_announcements(user_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -609,7 +784,7 @@ def get_user_favorite_announcements(user_id):
         if not page > 0:
             raise ValueError
 
-        offset = (page*per_page) - per_page
+        offset = (page * per_page) - per_page
 
         request_data = {
             "user_id": user_id,
@@ -621,12 +796,13 @@ def get_user_favorite_announcements(user_id):
             field = "active_flag"
         else:
             field = "completed_flag"
-      
+
         # Making query.
         query = f"""SELECT favorite_announcements.favorite_announcement_id, announcements.announcement_id,
                     users.first_name, announcements.seller_id, announcements.title,   
                     announcements.description, categories.name_category, announcements.price,
-                    announcements.location, announcements_main_photo.path AS main_photo
+                    announcements.location, announcements_main_photo.path AS main_photo,
+                    announcements.state, announcements.creation_date, announcements.mobile_number
                     FROM favorite_announcements 
                     JOIN announcements ON favorite_announcements.announcement_id=announcements.announcement_id
                     JOIN categories ON announcements.category_id=categories.category_id
@@ -637,20 +813,24 @@ def get_user_favorite_announcements(user_id):
                     AND announcements.{field}=True
                     ORDER BY favorite_announcements.favorite_announcement_id DESC
                     LIMIT %(per_page)s OFFSET %(offset)s """
-        
+
         # Executing query.
         cur.execute(query, request_data)
 
     except mysql.connector.Error as message:
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
-    
+
         return jsonify(result="Bad parameters. Required parameters: "
                               "/?page=int:>0&per_page=int:>0&active_flag=int:1/0."), 400
 
     else:
-        return jsonify(result=cur.fetchall()), 200
+        user_favorite_announcements = cur.fetchall()
+        for announcement in user_favorite_announcements:
+            announcement["creation_date"] = str(announcement["creation_date"])
+
+        return jsonify(result=user_favorite_announcements), 200
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -660,7 +840,7 @@ def get_user_favorite_announcements(user_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/favorite-announcements", methods=["POST"])
+@app.route("/users/<int:user_id>/favorite-announcements", methods=["POST"])
 def add_announcement_to_favorite(user_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -707,7 +887,7 @@ def add_announcement_to_favorite(user_id):
                 cur.close()
 
 
-@app.route("/favorite-announcements/<favorite_announcement_id>", methods=["DELETE"])
+@app.route("/favorite-announcements/<int:favorite_announcement_id>", methods=["DELETE"])
 def delete_announcement_from_favorite(favorite_announcement_id):
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
@@ -755,7 +935,8 @@ def get_announcements():
         query = """ SELECT announcements.announcement_id, users.first_name,
                     announcements.seller_id, categories.name_category, announcements.category_id,
                     announcements.title, announcements.description, 
-                    announcements.price, announcements.location, announcements_main_photo.path AS main_photo
+                    announcements.price, announcements.location, announcements_main_photo.path AS main_photo,
+                    announcements.state, announcements.creation_date, announcements.mobile_number
                     FROM announcements 
                     JOIN categories ON announcements.category_id=categories.category_id
                     JOIN users ON announcements.seller_id=users.user_id
@@ -769,13 +950,13 @@ def get_announcements():
         page = int(request.args.get("page"))
         if not page > 0:
             raise ValueError
-        
-        offset = (page*per_page) - per_page
+
+        offset = (page * per_page) - per_page
 
         content_to_search = request.args.get("q")
         location = request.args.get("l")
         category = request.args.get("c")
-       
+
         if content_to_search:
             # Init query for search field
             query = create_query_for_search_engine(content_to_search, query, "announcements.title")
@@ -788,21 +969,25 @@ def get_announcements():
 
         query += f"""ORDER BY announcements.announcement_id DESC
                      LIMIT {per_page} OFFSET {offset}"""
-        
+
         # Executing query.
         cur.execute(query)
 
     except mysql.connector.Error as message:
 
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
-    
+
         return jsonify(result="Bad parameters. Required parameters: /?page=int:>0&per_page=int:>0."
                               " Optional parameters: /?q=str&l=str&c=int:1/12."), 400
 
     else:
-        return jsonify(result=cur.fetchall()), 200
+        announcements = cur.fetchall()
+        for announcement in announcements:
+            announcement["creation_date"] = str(announcement["creation_date"])
+
+        return jsonify(result=announcements), 200
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -813,7 +998,7 @@ def get_announcements():
 
 
 #  announcement_id/ conversation_id
-@app.route("/users/<user_id>/messages", methods=["GET"])
+@app.route("/users/<int:user_id>/messages", methods=["GET"])
 def get_messages(user_id):
     connection = None
     cur = None
@@ -857,7 +1042,7 @@ def get_messages(user_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/messages", methods=["POST"])
+@app.route("/users/<int:user_id>/messages", methods=["POST"])
 def send_message(user_id):
     connection = None
     cur = None
@@ -907,7 +1092,7 @@ def send_message(user_id):
                 cur.close()
 
 
-@app.route("/users/<user_id>/conversations", methods=["GET"])
+@app.route("/users/<int:user_id>/conversations", methods=["GET"])
 def get_conversations(user_id):
     connection = None
     cur = None
@@ -919,7 +1104,7 @@ def get_conversations(user_id):
 
         customer_flag = int(request.args.get("customer_flag"))
         if not (customer_flag == 0 or customer_flag == 1):
-            raise ValueError 
+            raise ValueError
         per_page = int(request.args.get("per_page"))
         if not per_page > 0:
             raise ValueError
@@ -927,7 +1112,7 @@ def get_conversations(user_id):
         if not page > 0:
             raise ValueError
 
-        offset = (page*per_page) - per_page
+        offset = (page * per_page) - per_page
 
         request_data = {
             "user_id": user_id,
@@ -941,7 +1126,7 @@ def get_conversations(user_id):
         else:
             on_field = "conversations.user_id"
             where_field = "announcements.seller_id"
-        
+
         # Making query.
         query = f"""SELECT conversations.conversation_id, 
                     conversations.announcement_id, announcements.title,
@@ -953,17 +1138,17 @@ def get_conversations(user_id):
                     AND (announcements.active_flag=True OR 
                     announcements.completed_flag=True)
                     ORDER BY conversations.conversation_id DESC
-                    LIMIT %(per_page)s OFFSET %(offset)s """ 
-        
+                    LIMIT %(per_page)s OFFSET %(offset)s """
+
         # Executing query.
         cur.execute(query, request_data)
-       
+
     except mysql.connector.Error as message:
 
         return jsonify(result=message.msg), 500
-    
+
     except (KeyError, ValueError, TypeError):
-    
+
         return jsonify(result="Bad parameters. Required parameters:"
                               " /?page=int:>0&per_page=int:>0&customer_flag=int:1/0."), 400
 
