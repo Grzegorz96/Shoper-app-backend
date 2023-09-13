@@ -126,12 +126,9 @@ def upload_media(user_id):
         # In any other case, the program will return 500.
         return jsonify(result=message.msg), 500
 
-    # In case of an error during parameters validation, the program will check whether the file has been created and,
-    # if necessary, delete it and return a json file with the appropriate message and status 400.
+    # In case of an error during parameters validation, the program will return a json file with the appropriate
+    # message and status 400.
     except (KeyError, ValueError, TypeError):
-        if Path(file_path).exists():
-            os.remove(file_path)
-
         return jsonify(result="Bad parameters. Required parameters: "
                               "/?announcement_id=int:>0&main_photo_flag=int:1/0."), 400
 
@@ -691,7 +688,7 @@ def add_announcement(user_id):
 
 
 @app.route("/users/login-verification", methods=["GET"])
-def varify_login():
+def verify_login():
     """Function responsible for verifying the login entered by the user and informing the user about its availability.
     Allowed methods: GET."""
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
