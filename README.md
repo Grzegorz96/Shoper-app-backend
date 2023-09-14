@@ -257,7 +257,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Verification whether the login sent in the request content is included in the data. | 
+| `users`   | `string`| **Required** Verification whether the login transmitted in the request body isn't included in the database. | 
 
 ```http
   GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
