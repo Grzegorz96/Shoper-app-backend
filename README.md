@@ -264,7 +264,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
-| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `string`| **Required** Allowed values: 1/0, specifying whether to download active or closed announcements. | `per_page`| `string`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `string`| **Required** Allowed values: >0, specifying which page to return. |
+| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or closed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
 
 
