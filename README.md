@@ -387,11 +387,47 @@ CREATE TABLE `favorite_announcements` (
 | `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite-announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
 
 
+## Lessons Learned
+
+Writing a backend for a Shoper project taught me a lot. I learned how to operate on multimedia files via the http protocol. I made sure to validate the entered data and handle each error appropriately. I improved my knowledge of the SQL language, designing tables and the relationships between them was a challenge for me. Initially, the front-end program worked without an API, I had to create the necessary functions and properly connect them to the second program. While writing the program, I had to solve many problems and it was from the Shoper program that I learned the most. I had to create a coherent program that operated on files on the server and data in the database. Any failure on the server should result in failure to perform the operation on the database and vice versa. Everything must work coherently. It took me about 2 months to write a coherently functioning program (frontend + backend + database), during which time my skills and knowledge improved significantly.
 
 
+## Features to be implemented
+- Email verification function by sending a code to email.
+- Password recovery and change function via a code sent to email.
+- Hashing of user passwords in the database.
+- JSON Web Tokens system.
 
 
+## Authors
+
+- [@Grzegorz96](https://www.github.com/Grzegorz96)
 
 
+## Contact
+
+E-mail: grzesstrzeszewski@gmail.com
 
 
+## License
+
+[MIT](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/LICENSE.md)
+
+
+## Screnshoots
+##### Users table
+![users](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/3b2578d9-aa49-43b6-a0f1-146b41f43851)
+##### Announcements table
+![announcements](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/5de0d0d4-0d70-4333-b139-a09881e523cb)
+##### Categories table
+![categories](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/2f781a78-7133-44e8-b348-b2b142b3c070)
+##### Favorite_announcements table
+![fav_ann](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/9d3d90bb-d93c-432f-b519-b52bf1bc4c72)
+##### Conversations table
+![conv](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/fda14cc4-8947-4518-a51f-9969d252601e)
+##### Messages table
+![messeges](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/e04c2e39-d997-47d6-8270-92c758712041)
+##### Announcements_main_photo table
+![main_photo](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/986415d9-bfdb-4171-b7b5-6ec5b0af3aec)
+##### Announcements_media table
+![media](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/7af51079-8906-4dc0-8093-c132a2d81153)
