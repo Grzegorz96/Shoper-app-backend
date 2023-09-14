@@ -266,8 +266,12 @@ CREATE TABLE `favorite_announcements` (
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
-
-
+```http
+  GET /announcements/search?per_page=&page=&q=&l=&c=
+```
+| Resource        | Type    | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
+| :--------       | :-------| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------|
+| `announcements` | `string`| **Required** Getting all announcements for specific parameters. | `per_age` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
 
 
 
