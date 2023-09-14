@@ -164,7 +164,7 @@ def download_media():
 
 @app.route("/announcements/<int:announcement_id>/media/paths", methods=["GET"])
 def get_media_paths(announcement_id):
-    """Function responsible for downloading paths to graphic files. The user must specify which advertisement he wants
+    """Function responsible for downloading paths to graphic files. The user must specify which announcement he wants
     to download the paths to. Allowed methods: GET."""
     # Making empty connection and cursor, if connection or cursor won't be created then in finally won't be error.
     connection = None
@@ -807,7 +807,7 @@ def update_user_data(user_id):
 
 @app.route("/announcements/<int:announcement_id>/complete", methods=["PATCH"])
 def complete_the_announcement(announcement_id):
-    """Function responsible for terminating active user advertisements. Allowed methods: PATCH."""
+    """Function responsible for terminating active user announcements. Allowed methods: PATCH."""
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
@@ -1013,7 +1013,7 @@ def get_user_favorite_announcements(user_id):
 
 @app.route("/users/<int:user_id>/favorite-announcements", methods=["POST"])
 def add_announcement_to_favorite(user_id):
-    """Function responsible for adding advertisements to favorites by the user. Allowed methods: POST."""
+    """Function responsible for adding announcement to favorites by the user. Allowed methods: POST."""
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
@@ -1076,7 +1076,7 @@ def add_announcement_to_favorite(user_id):
 @app.route("/favorite-announcements/<int:favorite_announcement_id>", methods=["DELETE"])
 def delete_announcement_from_favorite(favorite_announcement_id):
     """Function responsible for removing an announcement from the user's favorite announcements.
-    Allowed methods: DELETE"""
+    Allowed methods: DELETE."""
     # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
