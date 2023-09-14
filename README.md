@@ -220,4 +220,20 @@ CREATE TABLE `favorite_announcements` (
 ```
 
 
+## API Reference
 
+#### HTTP GET METHODS:
+
+```http
+  GET /media/download
+```
+| Resource    | Type    | Description                |
+| :--------   | :-------| :------------------------- |
+| `media` | `string`| **Required** Getting a photo from the path included in request_body. |
+
+```http
+  GET /announcements/<int:announcement_id>/media/paths
+```
+| Resource    | Type    | Description                | Sub-resource | Type    | Description                |
+| :--------   | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. |
