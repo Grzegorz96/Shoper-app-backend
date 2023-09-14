@@ -252,6 +252,47 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------    | :------- | :------------------------- |
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. |
 
+```http
+  GET /users/login-verification
+```
+| Resource  | Type    | Description                | 
+| :-------- | :-------| :------------------------- | 
+| `users`   | `string`| **Required** Verification whether the login sent in the request content is included in the data. | 
+
+```http
+  GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
+```
+| Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
+| :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
+| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `string`| **Required** Allowed values: 1/0, specifying whether to download active or closed announcements. | `per_page`| `string`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `string`| **Required** Allowed values: >0, specifying which page to return. |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
