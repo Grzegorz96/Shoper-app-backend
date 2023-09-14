@@ -246,11 +246,11 @@ CREATE TABLE `favorite_announcements` (
 | `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
 
 ```http
-  GET /users/<int:user_id>/announcements
+  GET /users/<int:user_id>/announcements?active_flag=&per_page=&page=
 ```
-| Resource  | Type    | Description                | Resource id | Type    | Description                | Sub-resource | Type    | Description                 |
-| :-------- | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------    | :------- | :------------------------- |
-| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. |
+| Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
+| :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
+| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
 ```http
   GET /users/login-verification
@@ -264,7 +264,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
-| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or closed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
 
 
