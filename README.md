@@ -227,13 +227,42 @@ CREATE TABLE `favorite_announcements` (
 ```http
   GET /media/download
 ```
-| Resource    | Type    | Description                |
-| :--------   | :-------| :------------------------- |
-| `media` | `string`| **Required** Getting a photo from the path included in request_body. |
+| Resource  | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
 ```http
   GET /announcements/<int:announcement_id>/media/paths
 ```
-| Resource    | Type    | Description                | Sub-resource | Type    | Description                |
-| :--------   | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| Resource        | Type    | Description               | Resource id | Type    | Description                |
+| :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. |
+
+```http
+  GET /users/login
+```
+| Resource  | Type    | Description                |
+| :-------- | :-------| :------------------------- |
+| `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
+
+```http
+  GET /users/<int:user_id>/announcements
+```
+| Resource  | Type    | Description                | Resource id | Type    | Description                | Sub-resource | Type    | Description                 |
+| :-------- | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------    | :------- | :------------------------- |
+| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
