@@ -296,28 +296,95 @@ CREATE TABLE `favorite_announcements` (
 | :--------| :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- |
 | `media`  | `string`| **Required** Upload a graphic file sent in files to the server and save its path in the database. | `user_id`| `int`| **Required** ID to specify the user. |  `main_photo_flag`| `int`| **Required** Allowed values: 1/0, specifying whether the photo should be saved in the database as the main one or not. | `announcement_id`| `int`| **Required** Allowed values: >1, specifying which announcement the uploaded file refers to.|
 
+```http
+  POST /users/register
+```
+| Resource  | Type    | Description                | 
+| :-------- | :-------| :------------------------- | 
+| `users`   | `string`| **Required** Adding a new user to the users table. The data is downloaded from the request body. | 
 
+```http
+  POST /users/<int:user_id>/announcements
+```
+| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `announcements` | `string`| **Required** Adding an announcement by a specific user, with data sent via request body. |
 
+```http
+  POST /users/<int:user_id>/favorite-announcements
+```
+| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `favorite-announcements` | `string`| **Required** Adding the announcement sent in request data to the user's favorites. |
 
+```http
+  POST /users/<int:user_id>/messages
+```
+| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Adding a message by a specific user with specific data sent in the request body. |
 
+#### HTTP PATCH METHODS:
 
+```http
+  PATCH /users/<int:user_id>
+```
+| Resource  | Type    | Description                | Resource id  | Type    | Description                | 
+| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `users`   | `string`| **Required** Updating a specific user field with data sent in the request body. | `users_id` | `int`| **Required** ID to specify the user. | 
 
+```http
+  PATCH /announcements/<int:announcement_id>/complete
+```
+| Resource        | Type    | Description                | Resource id  | Type    | Description                | 
+| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `announcements` | `string`| **Required** Updating the flag for a given announcement from active to completed. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
+```http
+  PATCH /announcements/<int:announcement_id>/restore
+```
+| Resource        | Type    | Description                | Resource id  | Type    | Description                | 
+| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to active. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
+```http
+  PATCH /announcements/<int:announcement_id>/delete
+```
+| Resource        | Type    | Description                | Resource id  | Type    | Description                | 
+| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to deleted. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
+#### HTTP PUT METHODS:
 
+```http
+  PUT /media/switch/<int:user_id>?to_media_flag=&to_main_flag=
+```
+| Resource        | Type    | Description                | Resource id  | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                | 
+| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
+| `media` | `string`| **Required** Deletes a record from one table and creates it in another table. Transferring paths between the announcements_main_photo table and the announcements_media. | `user_id` | `int`| **Required** ID to specify the user who owns the image files. |  `to_media_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request body from main_photo to media. | `to_main_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request_body from media to main_photo.| 
 
+```http
+  PUT /announcements/<int:announcement_id>
+```
+| Resource        | Type    | Description                | Resource id  | Type    | Description                |
+| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
+| `announcements` | `string`| **Required** Updating a specific announcement with data sent in the request body. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
 
+#### HTTP DELETE METHODS:
 
+```http
+  DELETE /media/delete?main_photo_flag=&path=
+```
+| Resource        | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                |
+| :--------       | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
+| `media` | `string`| **Required** Deleting the photo from the server and its path from the database using the information from the parameters. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | `main_photo_flag` | `int`| **Required** Allowed values: 1/0, determines whether the user deletes the main photo or not. | `path` | `string`| **Required** Path to the saved photo on the server. |
 
-
-
-
-
-
-
-
-
+```http
+  DELETE /favorite-announcements/<int:favorite_announcement_id>
+```
+| Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
+| :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite-announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
 
 
 
