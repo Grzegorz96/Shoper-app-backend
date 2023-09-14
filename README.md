@@ -232,10 +232,10 @@ CREATE TABLE `favorite_announcements` (
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
 ```http
-  GET /announcements/<int:announcement_id>/media/paths
+  GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
-| Resource        | Type    | Description               | Resource id | Type    | Description                |
-| :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- |
+| Resource        | Type    | Description               | Resource id | Type    | Description                | Parameter | Type    | Description  |
+| :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. |
 
 ```http
@@ -248,7 +248,7 @@ CREATE TABLE `favorite_announcements` (
 ```http
   GET /users/<int:user_id>/announcements?active_flag=&per_page=&page=
 ```
-| Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
+| Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
@@ -262,7 +262,7 @@ CREATE TABLE `favorite_announcements` (
 ```http
   GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
 ```
-| Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parametr | Type | Description  | Parametr | Type | Description | Parametr | Type | Description |
+| Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
