@@ -287,7 +287,14 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :-------| :-----------| :--------    | :-------| :-----------| :--------    | :-------| :-----------| :-------- | :----| :----------- | :-------- | :----| :----------- | :-------- | :----| :----------- |
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `conversations` | `string`| **Required** Getting a user's conversation as a buyer or as seller. | `customer_flag` | `int`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a buyer. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | 
 
+#### HTTP POST METHODS:
 
+```http
+  POST /media/upload/<user_id>?main_photo_flag=&announcement_id=
+```
+| Resource | Type    | Description                | Resource id | Type    | Description                | Parameter   | Type    | Description                | Parameter   |    Type |               Description  |
+| :--------| :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- |
+| `media`  | `string`| **Required** Upload a graphic file sent in files to the server and save its path in the database. | `user_id`| `int`| **Required** ID to specify the user. |  `main_photo_flag`| `int`| **Required** Allowed values: 1/0, specifying whether the photo should be saved in the database as the main one or not. | `announcement_id`| `int`| **Required** Allowed values: >1, specifying which announcement the uploaded file refers to.|
 
 
 
