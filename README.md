@@ -301,6 +301,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   POST /media/upload/<user_id>?main_photo_flag=&announcement_id=
 ```
+A function that adds a graphic file to the server and its path to the database. FILES={"file":file.jpg}
 | Resource | Type    | Description                | Resource id | Type    | Description                | Parameter   | Type    | Description                | Parameter   |    Type |               Description  |
 | :--------| :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- |
 | `media`  | `string`| **Required** Upload a graphic file sent in files to the server and save its path in the database. | `user_id`| `int`| **Required** ID to specify the user. |  `main_photo_flag`| `int`| **Required** Allowed values: 1/0, specifying whether the photo should be saved in the database as the main one or not. | `announcement_id`| `int`| **Required** Allowed values: >1, specifying which announcement the uploaded file refers to.|
@@ -308,6 +309,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   POST /users/register
 ```
+A function that adds a user to the database. JSON={"first_name":string, "last_name":string, "email":string, "login":string, "password":string, "date_of_birth:string, "street":string, "zip_code":string, "city":string}.
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Adding a new user to the users table. The data is downloaded from the request body. | 
@@ -315,6 +317,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   POST /users/<int:user_id>/announcements
 ```
+A function that adds announcements to the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer, "category_id":integer}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `announcements` | `string`| **Required** Adding an announcement by a specific user, with data sent via request body. |
@@ -322,6 +325,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   POST /users/<int:user_id>/favorite-announcements
 ```
+A function that adds favorite announcement to the database. JSON={"announcement_id":integer}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `favorite-announcements` | `string`| **Required** Adding the announcement sent in request data to the user's favorites. |
@@ -329,6 +333,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   POST /users/<int:user_id>/messages
 ```
+The function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":bool, "content":string}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Adding a message by a specific user with specific data sent in the request body. |
@@ -338,6 +343,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PATCH /users/<int:user_id>
 ```
+A function that updates one value for the user. JSON={"column":string, "value":string}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `users`   | `string`| **Required** Updating a specific user field with data sent in the request body. | `users_id` | `int`| **Required** ID to specify the user. | 
@@ -345,6 +351,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PATCH /announcements/<int:announcement_id>/complete
 ```
+A function that changes the announcement from active to completed.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from active to completed. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
@@ -352,6 +359,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PATCH /announcements/<int:announcement_id>/restore
 ```
+A function that changes the announcement from completed to active.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to active. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
@@ -359,6 +367,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PATCH /announcements/<int:announcement_id>/delete
 ```
+A function that changes the announcement from completed to deleted.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to deleted. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
@@ -368,6 +377,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PUT /media/switch/<int:user_id>?to_media_flag=&to_main_flag=
 ```
+A function that transfers the path from the photo table to the main photo table and vice versa. JSON={"main_photo_path":string, "media_photo_path":string, "announcement_id":integer}.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
 | `media` | `string`| **Required** Deletes a record from one table and creates it in another table. Transferring paths between the announcements_main_photo table and the announcements_media. | `user_id` | `int`| **Required** ID to specify the user who owns the image files. |  `to_media_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request body from main_photo to media. | `to_main_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request_body from media to main_photo.| 
@@ -375,6 +385,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   PUT /announcements/<int:announcement_id>
 ```
+A function that updates the entire announcement record in the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer}.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating a specific announcement with data sent in the request body. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
@@ -384,6 +395,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   DELETE /media/delete?main_photo_flag=&path=
 ```
+A function that removes photos from the server and their paths from the database.
 | Resource        | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
 | `media` | `string`| **Required** Deleting the photo from the server and its path from the database using the information from the parameters. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | `main_photo_flag` | `int`| **Required** Allowed values: 1/0, determines whether the user deletes the main photo or not. | `path` | `string`| **Required** Path to the saved photo on the server. |
@@ -391,6 +403,7 @@ A function that downloads user's conversations from the database using informati
 ```http
   DELETE /favorite-announcements/<int:favorite_announcement_id>
 ```
+A function that removes favorite announcements from the database.
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite-announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
