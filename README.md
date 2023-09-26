@@ -223,7 +223,7 @@ CREATE TABLE `favorite_announcements` (
 ## API Reference
 
 #### HTTP GET METHODS:
-A function that downloads a file from the server using the submitted path. JSON={"path":string}.
+##A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 ```http
   GET /media/download
 ```
