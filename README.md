@@ -239,7 +239,7 @@ CREATE TABLE `favorite_announcements` (
 | :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------  | :-------| :------------|
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. | `main_photo_flag` | `int` | **Required** Allowed values: 1/0, specifies whether to get paths from the announcements_media table or from the announcements_main_photo table. |
 
-##### 3.A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
+##### 3. A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 ```http
   GET /users/login
 ```
