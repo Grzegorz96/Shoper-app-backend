@@ -223,7 +223,7 @@ CREATE TABLE `favorite_announcements` (
 ## API Reference
 
 #### HTTP GET METHODS:
-##### 1.A function that downloads a file from the server using the submitted path. JSON={"path":string}.
+##### 1. A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 ```http
   GET /media/download
 ```
@@ -231,7 +231,7 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :------- | :------------------------- |
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
-##### 2.A function that downloads a file paths from the database using information from url.
+##### 2. A function that downloads a file paths from the database using information from url.
 ```http
   GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
@@ -239,170 +239,170 @@ CREATE TABLE `favorite_announcements` (
 | :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------  | :-------| :------------|
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. | `main_photo_flag` | `int` | **Required** Allowed values: 1/0, specifies whether to get paths from the announcements_media table or from the announcements_main_photo table. |
 
+##### 3.A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 ```http
   GET /users/login
 ```
-##### 3.A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 | Resource  | Type    | Description                |
 | :-------- | :-------| :------------------------- |
 | `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
 
+##### 4. A function that downloads user's announcements from the database using information from url.
 ```http
   GET /users/<int:user_id>/announcements?active_flag=&per_page=&page=
 ```
-##### A function that downloads user's announcements from the database using information from url.
 | Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
+##### 5. A function that informs the user whether a given login is available. JSON={"login":string}.
 ```http
   GET /users/login-verification
 ```
-A function that informs the user whether a given login is available. JSON={"login":string}.
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Verification whether the login transmitted in the request body isn't included in the database. | 
 
+##### 6. A function that downloads user's favorite announcements from the database using information from url.
 ```http
   GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
 ```
-A function that downloads user's favorite announcements from the database using information from url.
 | Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
+##### 7. A function that downloads announcements from the database using information from parameters.
 ```http
   GET /announcements/search?per_page=&page=&q=&l=&c=
 ```
-A function that downloads announcements from the database using information from parameters.
 | Resource        | Type    | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :--------       | :-------| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------|
 | `announcements` | `string`| **Required** Getting all announcements for specific parameters. | `per_age` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
 
+##### 8. A function that downloads user's messages from the database. JSON={"conversation_id":integer, "announcement_id":integer}.
 ```http
   GET /users/<int:user_id>/messages
 ```
-A function that downloads user's messages from the database. JSON={"conversation_id":integer, "announcement_id":integer}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Getting messages for a given user when specifying conversation_id or announcement_id in request_body. | 
 
+##### 9. A function that downloads user's conversations from the database using information from url.
 ```http
   GET /users/<int:user_id>/conversations?customer_flag=&per_page=&page=
 ```
-A function that downloads user's conversations from the database using information from url.
 | Resource  | Type    | Description | Resource id  | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :-------- | :-------| :-----------| :--------    | :-------| :-----------| :--------    | :-------| :-----------| :-------- | :----| :----------- | :-------- | :----| :----------- | :-------- | :----| :----------- |
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `conversations` | `string`| **Required** Getting a user's conversation as a buyer or as seller. | `customer_flag` | `int`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a buyer. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | 
 
 #### HTTP POST METHODS:
 
+##### 1. A function that adds a graphic file to the server and its path to the database. FILES={"file":file.jpg}.
 ```http
   POST /media/upload/<user_id>?main_photo_flag=&announcement_id=
 ```
-A function that adds a graphic file to the server and its path to the database. FILES={"file":file.jpg}
 | Resource | Type    | Description                | Resource id | Type    | Description                | Parameter   | Type    | Description                | Parameter   |    Type |               Description  |
 | :--------| :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- |
 | `media`  | `string`| **Required** Upload a graphic file sent in files to the server and save its path in the database. | `user_id`| `int`| **Required** ID to specify the user. |  `main_photo_flag`| `int`| **Required** Allowed values: 1/0, specifying whether the photo should be saved in the database as the main one or not. | `announcement_id`| `int`| **Required** Allowed values: >1, specifying which announcement the uploaded file refers to.|
 
+##### 2. A function that adds a user to the database. JSON={"first_name":string, "last_name":string, "email":string, "login":string, "password":string, "date_of_birth:string, "street":string, "zip_code":string, "city":string}.
 ```http
   POST /users/register
 ```
-A function that adds a user to the database. JSON={"first_name":string, "last_name":string, "email":string, "login":string, "password":string, "date_of_birth:string, "street":string, "zip_code":string, "city":string}.
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Adding a new user to the users table. The data is downloaded from the request body. | 
 
+##### 3. A function that adds announcements to the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer, "category_id":integer}.
 ```http
   POST /users/<int:user_id>/announcements
 ```
-A function that adds announcements to the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer, "category_id":integer}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `announcements` | `string`| **Required** Adding an announcement by a specific user, with data sent via request body. |
 
+##### 4. A function that adds favorite announcement to the database. JSON={"announcement_id":integer}.
 ```http
   POST /users/<int:user_id>/favorite-announcements
 ```
-A function that adds favorite announcement to the database. JSON={"announcement_id":integer}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `favorite-announcements` | `string`| **Required** Adding the announcement sent in request data to the user's favorites. |
 
+##### 5. The function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":bool, "content":string}.
 ```http
   POST /users/<int:user_id>/messages
 ```
-The function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":bool, "content":string}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Adding a message by a specific user with specific data sent in the request body. |
 
 #### HTTP PATCH METHODS:
 
+##### 1. A function that updates one value for the user. JSON={"column":string, "value":string}.
 ```http
   PATCH /users/<int:user_id>
 ```
-A function that updates one value for the user. JSON={"column":string, "value":string}.
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `users`   | `string`| **Required** Updating a specific user field with data sent in the request body. | `users_id` | `int`| **Required** ID to specify the user. | 
 
+##### 2. A function that changes the announcement from active to completed.
 ```http
   PATCH /announcements/<int:announcement_id>/complete
 ```
-A function that changes the announcement from active to completed.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from active to completed. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
+##### 3. A function that changes the announcement from completed to active.
 ```http
   PATCH /announcements/<int:announcement_id>/restore
 ```
-A function that changes the announcement from completed to active.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to active. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
+##### 4. A function that changes the announcement from completed to deleted.
 ```http
   PATCH /announcements/<int:announcement_id>/delete
 ```
-A function that changes the announcement from completed to deleted.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to deleted. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
 #### HTTP PUT METHODS:
 
+##### 1. A function that transfers the path from the photo table to the main photo table and vice versa. JSON={"main_photo_path":string, "media_photo_path":string, "announcement_id":integer}.
 ```http
   PUT /media/switch/<int:user_id>?to_media_flag=&to_main_flag=
 ```
-A function that transfers the path from the photo table to the main photo table and vice versa. JSON={"main_photo_path":string, "media_photo_path":string, "announcement_id":integer}.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
 | `media` | `string`| **Required** Deletes a record from one table and creates it in another table. Transferring paths between the announcements_main_photo table and the announcements_media. | `user_id` | `int`| **Required** ID to specify the user who owns the image files. |  `to_media_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request body from main_photo to media. | `to_main_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request_body from media to main_photo.| 
 
+##### 2. A function that updates the entire announcement record in the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer}.
 ```http
   PUT /announcements/<int:announcement_id>
 ```
-A function that updates the entire announcement record in the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer}.
 | Resource        | Type    | Description                | Resource id  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
 | `announcements` | `string`| **Required** Updating a specific announcement with data sent in the request body. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
 
 #### HTTP DELETE METHODS:
 
+##### 1. A function that removes photos from the server and their paths from the database.
 ```http
   DELETE /media/delete?main_photo_flag=&path=
 ```
-A function that removes photos from the server and their paths from the database.
 | Resource        | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
 | `media` | `string`| **Required** Deleting the photo from the server and its path from the database using the information from the parameters. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | `main_photo_flag` | `int`| **Required** Allowed values: 1/0, determines whether the user deletes the main photo or not. | `path` | `string`| **Required** Path to the saved photo on the server. |
 
+##### 2. A function that removes favorite announcements from the database.
 ```http
   DELETE /favorite-announcements/<int:favorite_announcement_id>
 ```
-A function that removes favorite announcements from the database.
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite-announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
