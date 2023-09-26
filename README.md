@@ -223,7 +223,7 @@ CREATE TABLE `favorite_announcements` (
 ## API Reference
 
 #### HTTP GET METHODS:
-#### A function that downloads a file from the server using the submitted path. JSON={"path":string}.
+##### A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 ```http
   GET /media/download
 ```
@@ -231,7 +231,7 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :------- | :------------------------- |
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
-A function that downloads a file paths from the database using information from url.
+##### A function that downloads a file paths from the database using information from url.
 ```http
   GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
@@ -242,7 +242,7 @@ A function that downloads a file paths from the database using information from 
 ```http
   GET /users/login
 ```
-A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
+##### A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 | Resource  | Type    | Description                |
 | :-------- | :-------| :------------------------- |
 | `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
@@ -250,7 +250,7 @@ A function that downloads data about user from the database. JSON={"login_or_ema
 ```http
   GET /users/<int:user_id>/announcements?active_flag=&per_page=&page=
 ```
-A function that downloads user's announcements from the database using information from url.
+##### A function that downloads user's announcements from the database using information from url.
 | Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
