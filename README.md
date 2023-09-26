@@ -223,19 +223,18 @@ CREATE TABLE `favorite_announcements` (
 ## API Reference
 
 #### HTTP GET METHODS:
-
+A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 ```http
   GET /media/download
 ```
-A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 | Resource  | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
+A function that downloads a file paths from the database using information from url.
 ```http
   GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
-A function that downloads a file paths from the database using information from url.
 | Resource        | Type    | Description               | Resource id | Type    | Description                | Parameter | Type    | Description  |
 | :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------  | :-------| :------------|
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. | `main_photo_flag` | `int` | **Required** Allowed values: 1/0, specifies whether to get paths from the announcements_media table or from the announcements_main_photo table. |
