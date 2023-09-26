@@ -225,10 +225,10 @@ CREATE TABLE `favorite_announcements` (
 #### HTTP GET METHODS:
 
 ```http
-A function that downloads a file from the server using the submitted path.
   GET /media/download
-request_body={"path":"path"}
 ```
+A function that downloads a file from the server using the submitted path.
+request_body={"path":"path"}
 | Resource  | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
