@@ -223,7 +223,7 @@ CREATE TABLE `favorite_announcements` (
 ## API Reference
 
 #### HTTP GET METHODS:
-##### A function that downloads a file from the server using the submitted path. JSON={"path":string}.
+##### 1.A function that downloads a file from the server using the submitted path. JSON={"path":string}.
 ```http
   GET /media/download
 ```
@@ -231,7 +231,7 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :------- | :------------------------- |
 | `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
 
-##### A function that downloads a file paths from the database using information from url.
+##### 2.A function that downloads a file paths from the database using information from url.
 ```http
   GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
@@ -242,7 +242,7 @@ CREATE TABLE `favorite_announcements` (
 ```http
   GET /users/login
 ```
-##### A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
+##### 3.A function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 | Resource  | Type    | Description                |
 | :-------- | :-------| :------------------------- |
 | `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
