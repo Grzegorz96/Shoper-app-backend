@@ -235,7 +235,7 @@ A function that downloads a file from the server using the submitted path. JSON=
 ```http
   GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
 ```
-A function that downloads a file paths from the database using the announcement id from url.
+A function that downloads a file paths from the database using information from url.
 | Resource        | Type    | Description               | Resource id | Type    | Description                | Parameter | Type    | Description  |
 | :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------  | :-------| :------------|
 | `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. | `main_photo_flag` | `int` | **Required** Allowed values: 1/0, specifies whether to get paths from the announcements_media table or from the announcements_main_photo table. |
