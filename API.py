@@ -24,6 +24,8 @@ load_dotenv()
 app = Flask(__name__)
 # Assigning the folder path with users' media files with the application's UPLOAD_FOLDER key.
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
+# Setting the maximum size of files uploaded to the server.
+app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 
 
 @app.route("/media/upload/<user_id>", methods=["POST"])
