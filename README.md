@@ -20,6 +20,7 @@ The program contains four modules, the Database_connection.py module is responsi
 - Deleting grahgic files from the server.
 - Downloading graphic files from the server.
 - Returning a collection of records in a pagination system.
+- File upload size validation.
 - Intelligent creation of a query to the database when the user wants to download announcements with specific parameters.
 
 
