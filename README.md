@@ -407,7 +407,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite-announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
+| `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite_announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
 
 
 ## Lessons Learned
