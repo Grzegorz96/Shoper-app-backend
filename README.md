@@ -420,6 +420,7 @@ Writing a backend for a Shoper project taught me a lot. I learned how to operate
 - Password recovery and change function via a code sent to email.
 - Hashing of user passwords in the database.
 - JSON Web Tokens system.
+- Changing the function returning graphic files to return the entire package of files to the frontend. This will improve the optimization of the front-end program, reduce the number of photo queries and reduce the load on the back-end application.
 
 
 ## Authors
