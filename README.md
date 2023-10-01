@@ -189,19 +189,37 @@ CREATE TABLE `favorite_announcements` (
 ```bash
  git clone https://github.com/Grzegorz96/Shoper-app-backend.git
 ```
-- Create a folder for uploading multimedia in your Shoper-app-backend folder.
-- Create .env file in your Shoper-app-backend folder.
+- Go to the Shoper-app-backend directory.
+- Open the Shoper-app-backend on your IDE.
+- Create a folder for uploading multimedia in your Shoper-app-backend directory.
+- Create .env file in your Shoper-app-backend directory.
 - Add the required environment variables to the .env file.
-- Install required packages on your venv:
+- Create virtual enviroment for the project (Windows):
 ```bash
-  pip install -r requirements.txt
+ py -m venv venv
+```
+- Create virtual enviroment for the project (Linux):
+```bash
+ python3 -m venv venv
+```
+- Activate virtual enviroment (Windows):
+```bash
+ venv/Scripts/activate.bat
+```
+- Activate virtual enviroment (Linux):
+```bash
+ source venv/bin/activate
+```
+- Install required packages on your virtual enviroment:
+```bash
+ pip install -r requirements.txt
 ```
 - or
 ```bash
-  pip install Flask==2.3.2
-  pip install mysql-connector-python==8.1.0
-  pip install python-dotenv==1.0.0
-  pip install werkzeug==2.3.7
+ pip install Flask==2.3.2
+ pip install mysql-connector-python==8.1.0
+ pip install python-dotenv==1.0.0
+ pip install werkzeug==2.3.7
 ```
 - Run API.py on Windows:
 ```bash
