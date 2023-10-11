@@ -17,7 +17,7 @@ The program contains four modules, the Database_connection.py module is responsi
 - Automatic creation of a user folder on the server.
 - Automatic file renaming if required.
 - Adding graphic files to the server.
-- Deleting grahgic files from the server.
+- Deleting graphic files from the server.
 - Downloading graphic files from the server.
 - Returning a collection of records in a pagination system.
 - File upload size validation.
