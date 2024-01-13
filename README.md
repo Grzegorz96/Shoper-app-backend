@@ -41,6 +41,7 @@ The program contains four modules, the Database_connection.py module is responsi
 
 ##### Programs and libraries:
 - Python 3.11.1
+- IDE, for example Pycharm
 - MySQL Server 8.0
 - Flask 2.3.2
 - mysql-connector-python 8.1.0
