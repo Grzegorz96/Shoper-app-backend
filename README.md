@@ -443,7 +443,7 @@ Writing a backend for a Shoper project taught me a lot. I learned how to operate
 
 ## Authors
 
-- [@Grzegorz96](https://www.github.com/Grzegorz96)
+[@Grzegorz96](https://www.github.com/Grzegorz96)
 
 
 ## Contact
