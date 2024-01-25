@@ -223,7 +223,7 @@ CREATE TABLE `favorite_announcements` (
 ```bash
  source venv/bin/activate
 ```
-- Install required packages on your virtual enviroment:
+- Install required packages on your activated virtual enviroment:
 ```bash
  pip install -r requirements.txt
 ```
