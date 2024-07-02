@@ -1,22 +1,21 @@
 # Import of database connection function.
-from Database_connection import database_connect
-# Import of functions that create dynamic queries
-from Query_creator import create_query_for_search_engine, create_query_for_getting_messages
-# Import of a function validating the file entered to the server.
-from Media_validator import validation_file
+from database_connection import database_connect
+# Import of a helpers functions.
+from helpers import (validation_file_extension, convert_image_to_base64, create_query_for_search_engine,
+                     create_query_for_getting_messages)
 from werkzeug.utils import secure_filename
 # Import of a module operating on a database.
 import mysql.connector
 # Importing a module for creating APIs.
 from flask import Flask, jsonify, request, send_file
-# Import class for creating a path object.
-from pathlib import Path
 # Import of the validating module.
 from re import match
 # Import of a library that performs operations on the operating system.
 import os
 # Import of a function that loads environment variables into the module.
 from dotenv import load_dotenv
+import zipfile
+from io import BytesIO
 
 # Loading environment variables.
 load_dotenv()
@@ -26,117 +25,118 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
 # Setting the maximum size of files uploaded to the server.
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+# Setting the maximum size of a single file in a ZIP archive.
+app.config["MAX_FILE_LENGTH"] = 200 * 1024
 
 
 @app.route("/media/upload/<user_id>", methods=["POST"])
 def upload_media(user_id):
-    """The function responsible for validating the uploaded graphic file, creating its path on the server,
-    locating it in the path and adding the path to the database. Allowed methods: POST."""
-    # Validation of the received graphic file. If the file does not meet any of the specified conditions,
-    # the function will return status 400.
-    if "file" not in request.files:
-        return jsonify(result="Media not provided."), 400
+    """Function responsible for uploading media files to the server and adding paths to the database. Allowed methods:
+     POST."""
+    # Checking if the request contains a file. If not, return status 400.
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    # Getting the file and request data from the request.
     file = request.files["file"]
-    if file.filename == "":
-        return jsonify(result="No file selected."), 400
-    if not (file and validation_file(file.filename)):
-        return jsonify(result="Unsupported media type."), 400
+    request_data = request.form
+    
+    # Validate file extension.
+    if not file.filename.endswith('.zip'):
+        return jsonify({"error": "Unsupported file type, only zip files are allowed"}), 400
 
-    # If the file passes validation, the program will create a path to the directory where the file will be saved.
-    filename = secure_filename(file.filename)
-    path = os.path.join(os.getenv("UPLOAD_FOLDER"), user_id)
+    # Create user-specific directory if it doesn't exist.
+    user_folder = os.path.join(app.config["UPLOAD_FOLDER"], user_id)
+    os.makedirs(user_folder, exist_ok=True)
 
-    # Checking whether a given directory is on the server, if not the program will create it.
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-    # Making empty connection, cursor and file_path, if connection or cursor won't be created then in finally
-    # won't be error.
+    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
-    file_path = None
 
     try:
-        # Getting the main_photo_flag from the transferred parameter. If a given parameter is missing in the query or
-        # its values are other than 1 or 0, the program will throw an error and return the status 400.
-        main_photo_flag = int(request.args.get("main_photo_flag"))
-        if not (main_photo_flag == 1 or main_photo_flag == 0):
-            raise ValueError
+        # Request_data validation. If the data does not meet the validation requirements, an error will be thrown.
+        announcement_id = int(request_data.get("announcement_id"))
+        if announcement_id <= 0:
+            raise ValueError("Invalid announcement_id")
+        
+        main_photo_index = request_data.get("main_photo_index")
+        if main_photo_index is not None:
+            main_photo_index = int(main_photo_index)
+            if main_photo_index < 0:
+                raise ValueError("Invalid main_photo_index")
 
-        # Getting the announcement_id from the transferred parameter. Parameter validation.
-        announcement_id = int(request.args.get("announcement_id"))
-        if not announcement_id > 0:
-            raise ValueError
-
-        # Creating a file path to save.
-        file_path = os.path.join(path, filename)
-        # Creating a file path object to save.
-        file_path_object = Path(file_path)
-        # If a file with this name already exists, the program will create a new file path by adding another
-        # digit at the end of the path.
-        if file_path_object.exists():
-            parent = str(file_path_object.parent)
-            extension = "".join(file_path_object.suffixes)
-            base = str(file_path_object.name).replace(extension, "")
-
-            i = 2
-            file_path = os.path.join(parent, f"{base}_{str(i)}{extension}")
-            while Path(file_path).exists():
-                i += 1
-                file_path = os.path.join(parent, f"{base}_{str(i)}{extension}")
-
-        # Saving the file to the server for the validated path.
-        file.save(file_path)
-
-        # Creating a connection to the database and a cursor.
+        # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
 
-        # Creation of request_data.
-        request_data = {
-            "announcement_id": announcement_id,
-            "user_id": user_id,
-            "path": file_path
-        }
+        # Create a BytesIO object from the uploaded ZIP file content.
+        zip_buffer = BytesIO(file.read())
 
-        # Checking whether the user wanted to add a photo to the table with the main photo, and creating
-        # an appropriate query.
-        if main_photo_flag:
-            query = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
-                       VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
-        else:
-            query = """INSERT INTO announcements_media(user_id, announcement_id, path)
-                       VALUES(%(user_id)s, %(announcement_id)s, %(path)s) """
+        # Open the ZIP file for reading.
+        with zipfile.ZipFile(zip_buffer, 'r') as zip_ref:
+            # Check if the ZIP file is empty.
+            if not zip_ref.namelist():
+                raise ValueError("Zip file is empty")
+            
+            # Validate each file in the ZIP archive.
+            for filename in zip_ref.namelist():
+                # Check if the file has an allowed extension.
+                if not validation_file_extension(filename):
+                    raise ValueError(f"Unsupported media type: {filename}")
 
-        # Execution of a query on the database and confirmation of changes.
-        cur.execute(query, request_data)
-        connection.commit()
+                # Check if the file size exceeds the maximum allowed size.
+                if zip_ref.getinfo(filename).file_size > app.config["MAX_FILE_LENGTH"]:
+                    raise ValueError(f"File '{filename}' exceeds the maximum allowed size of"
+                                     f" {app.config['MAX_FILE_LENGTH']} bytes")
 
-    # If a file error occurs while saving the photo on the server, the program will return 500.
-    except FileNotFoundError:
-        return jsonify(result="Error during saving file, file or path doesn't exist."), 500
+            # Process and save each file from the ZIP archive.
+            for index, filename in enumerate(zip_ref.namelist()):
+                # Secure filename and create full file path.
+                secured_filename = secure_filename(filename)
+                file_path = os.path.join(user_folder, secured_filename)
 
-    # In case of an error while adding the path to the database, the program will delete the previously added photo on
-    # the server and return the appropriate status.
-    except mysql.connector.Error as message:
-        if Path(file_path).exists():
+                # If a file with this name already exists, add a number to the filename.
+                if os.path.exists(file_path):
+                    base, extension = os.path.splitext(secured_filename)
+                    i = 2
+
+                    while True:
+                        new_secured_filename = f"{base}_{i}{extension}"
+                        new_file_path = os.path.join(user_folder, new_secured_filename)
+                        if not os.path.exists(new_file_path):
+                            file_path = new_file_path
+                            break
+                        i += 1
+
+                # Extract and save the file.
+                with zip_ref.open(filename) as source, open(file_path, 'wb') as target:
+                    target.write(source.read())
+
+                # Determine the table name based on the index.
+                table_name = "announcements_main_photo" if index == main_photo_index else "announcements_media"              
+                query = f"""INSERT INTO {table_name} (user_id, announcement_id, path)
+                            VALUES (%s, %s, %s)"""
+                cur.execute(query, (user_id, announcement_id, file_path))
+                connection.commit()
+    
+    # If an error occurs during database operations, return status 500.
+    except mysql.connector.Error as error:
+        if os.path.exists(file_path):
             os.remove(file_path)
         # If the user wants to add a second profile picture, which is not allowed, it will return a 409 status.
-        if "announcement_id_UNIQUE" in message.msg:
-            return jsonify(result="Profile picture for announcement already exists."), 409
+        if "announcement_id_UNIQUE" in error.msg:
+            return jsonify(error="Profile picture for announcement already exists."), 409
 
         # In any other case, the program will return 500.
-        return jsonify(result=message.msg), 500
+        return jsonify(error=error.msg), 500
 
-    # In case of an error during parameters validation, the program will return a json file with the appropriate
-    # message and status 400.
-    except (KeyError, ValueError, TypeError):
-        return jsonify(result="Bad parameters. Required parameters: "
-                              "/?announcement_id=int:>0&main_photo_flag=int:1/0."), 400
-
-    # If successfully added to the server and the path to the database is added, the program will return status 201.
+    # If an error occurs while validating the request_data, return status 400.
+    except (ValueError, KeyError, TypeError) as error:
+        return jsonify(error=str(error)), 400
+    
+    # If successful, return status 201.
     else:
-        return jsonify(result="Media uploaded successfully."), 201
+        return jsonify(result="Media uploaded successfully"), 201
 
     # Closing connection with database and cursor if it exists.
     finally:
@@ -146,29 +146,10 @@ def upload_media(user_id):
                 cur.close()
 
 
-@app.route("/media/download", methods=["GET"])
-def download_media():
-    """Function responsible for downloading a graphic file using the received path and returning it to the user.
-    Allowed methods: GET."""
-    # Trying to return a file from path, if successful, return the file with status 200.
-    try:
-        request_data = request.get_json()
-        return send_file(request_data["path"], as_attachment=True), 200
-
-    # If an incorrect path is provided, return status 404.
-    except FileNotFoundError:
-        return jsonify(result="File or path doesn't exist."), 404
-
-    # If there is an error with the json being sent, return status 400.
-    except (KeyError, ValueError, TypeError):
-        return jsonify(result="Required json: {path:path}."), 400
-
-
-@app.route("/announcements/<int:announcement_id>/media/paths", methods=["GET"])
-def get_media_paths(announcement_id):
-    """Function responsible for downloading paths to graphic files. The user must specify which announcement he wants
-    to download the paths to. Allowed methods: GET."""
-    # Making empty connection and cursor, if connection or cursor won't be created then in finally won't be error.
+@app.route("/announcements/<int:announcement_id>/media", methods=["GET"])
+def download_media(announcement_id):
+    """Function responsible for downloading media files associated with the announcement. Allowed methods: GET."""
+    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
 
@@ -177,36 +158,54 @@ def get_media_paths(announcement_id):
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
 
-        # Getting the main_photo_flag from the transferred parameter. Parameter validation.
-        main_photo_flag = int(request.args.get("main_photo_flag"))
-        if not (main_photo_flag == 1 or main_photo_flag == 0):
-            raise ValueError
-
-        # If main_photo_flag is True, the operation will take place on the table with the main photos.
-        if main_photo_flag:
-            query = f"""SELECT announcements_main_photo.path FROM announcements_main_photo
+        # Making query to get main photo path.
+        query_main_photo = f"""SELECT announcements_main_photo.path FROM announcements_main_photo
                         WHERE announcements_main_photo.announcement_id={announcement_id} """
+        
+        cur.execute(query_main_photo)
+        main_photo_path = cur.fetchall()
 
-        # If main_photo_flag is False, the operation will take place on the table with photos.
-        else:
-            query = f"""SELECT announcements_media.path FROM announcements_media
+        # Making query to get media paths.
+        query_media = f"""SELECT announcements_media.path FROM announcements_media
                         WHERE announcements_media.announcement_id={announcement_id} """
+        
+        cur.execute(query_media)
+        media_paths = cur.fetchall()
 
-        # Execute SELECT query.
-        cur.execute(query)
+        # Connecting main photo path with media paths.
+        all_paths = main_photo_path + media_paths
 
+        # Create a buffer and save files to ZIP.
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
+            for media in all_paths:
+                path = media['path']
+                if os.path.exists(path):
+                    zip_file.write(path, os.path.basename(path))
+
+        # Set the pointer to the beginning of the buffer.
+        zip_buffer.seek(0)
+
+        # Prepare response with ZIP file.
+        response = send_file(zip_buffer, mimetype='application/zip', as_attachment=True,
+                             download_name=f"announcement_{announcement_id}_media.zip")
+        
+        # If there is a main photo, add it to the response headers.
+        if main_photo_path:
+            response.headers['X-Main-Photo'] = os.path.basename(main_photo_path[0]["path"])
+    
     # If an error occurs during database operations, return status 500.
-    except mysql.connector.Error as message:
-        return jsonify(result=message.msg), 500
+    except mysql.connector.Error as error:
+        return jsonify(error=error.msg), 500
+    
+    # If an error occurs while creating zip file, return status 500.
+    except (zipfile.BadZipFile, FileNotFoundError, IOError, OSError, ValueError, TypeError, EOFError):
+        return jsonify(rerror="Error during creating zip file."), 500
 
-    # If an error occurs while validating the parameter, return status 400.
-    except (KeyError, ValueError, TypeError):
-        return jsonify(result="Bad parameter. Required parameter: /?main_photo_flag=int:1/0."), 400
-
-    # If successful, return json with status 200.
+    # If successful, return response with status 200.
     else:
-        return jsonify(result=cur.fetchall()), 200
-
+        return response, 200
+    
     # Closing connection with database and cursor if it exists.
     finally:
         if connection:
@@ -215,68 +214,69 @@ def get_media_paths(announcement_id):
                 cur.close()
 
 
-@app.route("/media/delete", methods=["DELETE"])
-def delete_media():
-    """Function responsible for deleting photos from the server and their paths from the database.
-    Allowed methods: DELETE."""
-    # Making empty connection and cursor, if connection or cursor won't be created then in finally won't be error.
+@app.route("/media/delete/<user_id>", methods=["DELETE"])
+def delete_media(user_id):
+    """Function responsible for deleting files from the server and database. Allowed methods: DELETE."""
+    # Making empty connection and cursor, if connection and cursor won't be created then in finally won't be error.
     connection = None
     cur = None
 
-    try:
-        # Getting the main_photo_flag from the transferred parameter. Parameter validation.
-        main_photo_flag = int(request.args.get("main_photo_flag"))
-        if not (main_photo_flag == 1 or main_photo_flag == 0):
-            raise ValueError
+    # Creating request data from request body.
+    request_data = request.get_json()
+    files = request_data.get("files")
 
-        # Getting the path from the transferred parameter. Parameter validation.
-        path = request.args.get("path")
-        if not path:
-            raise ValueError
-
+    # If there are no files in the request_data, return status 400.
+    if not files:
+        return jsonify({"error": "No files provided"}), 400
+    
+    try: 
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        # Making request_data.
-        request_data = {"path": path}
+        # Creating user folder path.
+        user_folder = os.path.join(app.config["UPLOAD_FOLDER"], user_id)
 
-        # Depending on the flag, removing the path from the tables.
-        if main_photo_flag:
-            query = """DELETE FROM announcements_main_photo
-                       WHERE announcements_main_photo.path=%(path)s"""
-
-        else:
-            query = """DELETE FROM announcements_media
-                       WHERE announcements_media.path=%(path)s"""
-
-        # Execute SELECT query.
-        cur.execute(query, request_data)
-
-        # Trying to delete a file from the server, if the file exists, it will delete itself and the changes will be
-        # saved in the database.
-        if os.path.exists(path):
-            os.remove(path)
-            connection.commit()
-        # Otherwise, the program throws a 404 error.
-        else:
-            raise FileNotFoundError
+        # For each file in the request_data, the program will check if the file exists on the server and if so,
+        # it will delete it.
+        for file in files:
+            # Request_data validation. If the data does not meet the validation requirements, an error will be thrown.
+            filename = file.get("filename")
+            if not filename:
+                raise ValueError("No filename provided")
+            
+            is_main_photo = file.get("is_main_photo")
+            if is_main_photo is None:
+                raise ValueError("No is_main_photo provided")
+            
+            # Creating a full path to the file.
+            path = os.path.join(user_folder, filename)
+            
+            # If the file exists, the program will delete it from the server and the database.
+            if os.path.exists(path):
+                table_name = "announcements_main_photo" if is_main_photo else "announcements_media"             
+                query = f"""DELETE FROM {table_name} WHERE {table_name}.path=%s"""
+                cur.execute(query, (path,))
+                os.remove(path)
+                connection.commit()
+            else:
+                raise FileNotFoundError("File doesn't exist")
 
     # If an error occurs during database operations, return status 500.
-    except mysql.connector.Error as message:
-        return jsonify(result=message.msg), 500
-
-    # If an error occurs while validating the parameters, return status 400.
-    except (KeyError, ValueError, TypeError):
-        return jsonify(result="Bad parameters. Required parameters: /?main_photo_flag=int:1/0&path=str."), 400
-
+    except mysql.connector.Error as error:
+        return jsonify(error=error.msg), 500
+    
+    # If an error occurs while validating the parameters or request_data, return status 400.
+    except (ValueError, KeyError, TypeError) as error:
+        return jsonify(error=str(error)), 400
+    
     # If it does not find such a file on the server, return status 404.
-    except FileNotFoundError:
-        return jsonify(result="File doesn't exist."), 404
+    except FileNotFoundError as error:
+        return jsonify(error=str(error)), 404
 
     # If successful, return json with status 200.
     else:
-        return jsonify(result="successful deletion"), 200
-
+        return jsonify({"result": "Files deleted successfully"}), 200
+    
     # Closing connection with database and cursor if it exists.
     finally:
         if connection:
@@ -285,7 +285,7 @@ def delete_media():
                 cur.close()
 
 
-@app.route("/media/switch/<int:user_id>", methods=["PUT"])
+@app.route("/media/switch/<user_id>", methods=["PUT"])
 def switch_media(user_id):
     """Function responsible for replacing paths to photos in the database. Moves paths between the main_photo table and
     the media table. Allowed methods: PUT."""
@@ -293,61 +293,58 @@ def switch_media(user_id):
     connection = None
     cur = None
 
+    # Creating request data from request body.
+    request_data = request.get_json()
+    main_photo_filename = request_data.get("main_photo_filename")
+    media_photo_filename = request_data.get("media_photo_filename")
+
+    # If there are no filenames in the request_data, return status 400.
+    if not main_photo_filename and not media_photo_filename:
+        return jsonify(error="No filenames provided"), 400
+
     try:
         # Making connection and cursor as dictionary.
         connection = database_connect()
         cur = connection.cursor(dictionary=True)
-        # Creating request data from request body.
-        request_data = request.get_json()
-        request_data["user_id"] = user_id
+        user_folder = os.path.join(app.config["UPLOAD_FOLDER"], user_id)
 
-        # If both keys are missing in request_data, throw an error.
-        if not ("main_photo_path" in request_data or "media_photo_path" in request_data):
-            raise ValueError
+        # Request_data validation. If the data does not meet the validation requirements, an error will be thrown.
+        announcement_id = int(request_data.get("announcement_id"))
+        if announcement_id <= 0:
+            raise ValueError("Invalid announcement_id")
+        
+        # Making query to switch media.
+        if main_photo_filename:
+            main_photo_path = os.path.join(user_folder, main_photo_filename)
 
-        # If there is no announcement_id key in request_data, throw an error.
-        request_data["announcement_id"] = int(request_data["announcement_id"])
+            query_delete_main = f"""DELETE FROM announcements_main_photo
+                                    WHERE announcements_main_photo.path=%s"""
+            cur.execute(query_delete_main, (main_photo_path,))
 
-        # Getting the to_media_flag from the transferred parameter. Parameter validation.
-        to_media_flag = int(request.args.get("to_media_flag"))
-        if not (to_media_flag == 1 or to_media_flag == 0):
-            raise ValueError
+            query_add_media = f"""INSERT INTO announcements_media(user_id, announcement_id, path)
+                                  VALUES(%s, %s, %s)"""
+            cur.execute(query_add_media, (user_id, announcement_id, main_photo_path))
+        
+        if media_photo_filename:
+            media_photo_path = os.path.join(user_folder, media_photo_filename)
+           
+            query_delete_media = f"""DELETE FROM announcements_media
+                                     WHERE announcements_media.path=%s"""
+            cur.execute(query_delete_media, (media_photo_path,))
 
-        # Getting the to_main_flag from the transferred parameter. Parameter validation.
-        to_main_flag = int(request.args.get("to_main_flag"))
-        if not (to_main_flag == 1 or to_main_flag == 0):
-            raise ValueError
+            query_add_main = f"""INSERT INTO announcements_main_photo(user_id, announcement_id, path)
+                                 VALUES(%s, %s, %s)""" 
+            cur.execute(query_add_main, (user_id, announcement_id, media_photo_path))
 
-        # If the imported to_media_flag parameter was true, the program will remove the path from the
-        # announcements_main_photo table and place it in the announcements_media table.
-        if to_media_flag:
-            query_delete_main = """DELETE FROM announcements_main_photo
-                                    WHERE announcements_main_photo.path=%(main_photo_path)s"""
-            cur.execute(query_delete_main, request_data)
-            query_add_media = """INSERT INTO announcements_media(user_id, announcement_id, path)
-                                 VALUES(%(user_id)s, %(announcement_id)s, %(main_photo_path)s)"""
-            cur.execute(query_add_media, request_data)
-
-        # If the imported to_main_flag parameter was true, the program will remove the path from the announcements_media
-        # table and place it in the announcements_main_photo table.
-        if to_main_flag:
-            query_delete_media = """DELETE FROM announcements_media
-                                    WHERE announcements_media.path=%(media_photo_path)s"""
-            cur.execute(query_delete_media, request_data)
-            query_add_main = """INSERT INTO announcements_main_photo(user_id, announcement_id, path)
-                                VALUES(%(user_id)s, %(announcement_id)s, %(media_photo_path)s)"""
-            cur.execute(query_add_main, request_data)
-
-        # Saving the changes made.
         connection.commit()
 
     # If an error occurs during database operations, return status 500.
-    except mysql.connector.Error as message:
-        return jsonify(result=message.msg), 500
+    except mysql.connector.Error as error:
+        return jsonify(error=error.msg), 500
 
     # If an error occurs while validating the parameters or request_data, return status 400.
-    except (KeyError, ValueError, TypeError):
-        return jsonify(result="Bad parameters. Required parameters: /?to_main_flag=int:1/0&to_media_flag=int:1/0."), 400
+    except (KeyError, ValueError, TypeError) as error:
+        return jsonify(error=str(error)), 400
 
     # If successful, return json with status 200.
     else:
@@ -620,6 +617,9 @@ def get_user_announcements(user_id):
         user_announcements = cur.fetchall()
         for announcement in user_announcements:
             announcement["creation_date"] = str(announcement["creation_date"])
+         
+            if announcement["main_photo"]:
+                announcement["main_photo"] = convert_image_to_base64(announcement["main_photo"])
 
         return jsonify(result=user_announcements), 200
 
@@ -1003,6 +1003,9 @@ def get_user_favorite_announcements(user_id):
         for announcement in user_favorite_announcements:
             announcement["creation_date"] = str(announcement["creation_date"])
 
+            if announcement["main_photo"]:
+                announcement["main_photo"] = convert_image_to_base64(announcement["main_photo"])
+
         return jsonify(result=user_favorite_announcements), 200
 
     # Closing connection with database and cursor if it exists.
@@ -1194,6 +1197,9 @@ def get_announcements():
         announcements = cur.fetchall()
         for announcement in announcements:
             announcement["creation_date"] = str(announcement["creation_date"])
+          
+            if announcement["main_photo"]:
+                announcement["main_photo"] = convert_image_to_base64(announcement["main_photo"])
 
         return jsonify(result=announcements), 200
 
