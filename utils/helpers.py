@@ -1,19 +1,5 @@
-import base64
 import os
-from dotenv import load_dotenv
-# Load environment variables.
-load_dotenv()
 
-
-def convert_image_to_base64(image_path):
-    """Convert an image to a base64 encoded string."""
-    try:
-        with open(image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-            return encoded_string
-    except (FileNotFoundError, IOError, PermissionError, OSError):
-        return None
-    
 
 def validation_file_extension(filename):
     """Function responsible for validating the uploaded graphic file. Validates its extension taking into account

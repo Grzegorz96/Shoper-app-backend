@@ -1,12 +1,8 @@
 # Modules import.
 import mysql.connector
 import os
-from dotenv import load_dotenv
-# Load environment variables.
-load_dotenv()
 
 
-# Database connect function.
 def database_connect():
     """Function responsible for connecting to the database using data from environment variables."""
     connection = mysql.connector.connect(host=os.getenv("DATABASE_HOST"), user=os.getenv("DATABASE_USER"),
