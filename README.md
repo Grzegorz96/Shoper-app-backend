@@ -24,65 +24,77 @@ The SHOPER API contains endpoints necessary for the proper operation of the enti
 - app.py file is the main script for a Flask web application. It first loads environment variables using dotenv, then creates a Flask application object and configures it using the Config class. It registers blueprints defined in the application through the register_blueprints function. Finally, it runs the Flask server on port 5000 in debug mode, which is useful during development.
 
 ### Routes:
-#### Announcements:
-/routes/announcements/__init.py__:
-- The __init__.py file defines the blueprint for Flask announcements. Imports various views (functions) responsible for operations on advertisements, such as adding, updating, deleting, restoring, marking as completed, and managing favorite advertisements. Then, blueprint announcements_bp is created and assigned various URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
-There is a set of files in the /routes/announcements directory, each of which defines a function that handles a specific endpoint in the Flask application. Each of these files contains functions that respond to various ad operations:
-
-add_announcement.py: Defines a function for adding new announcements.
-add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
-complete_announcement.py: Supports marking announcements as completed.
-delete_announcement.py: Defines a function to delete announcements.
-delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
-get_announcements.py: Responsible for searching and returning announcements.
-get_user_announcements.py: Handles retrieving user announcements.
-get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
-restore_announcement.py: Supports restoring deleted announcements.
-update_announcement.py: Defines a function to update existing announcements.
-Each of these files exports a function that is then assigned to the appropriate endpoint in blueprint announcements_bp defined in the __init__.py file.
-
-
-### Routes:
 #### Announcements
 /routes/announcements/__init__.py:
-
 - The __init__.py file defines the blueprint for Flask announcements. It imports various views (functions) responsible for operations on advertisements, such as adding, updating, deleting, restoring, marking as completed, and managing favorite advertisements. Then, the blueprint announcements_bp is created and assigned various URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
 
 There is a set of files in the /routes/announcements directory, each of which defines a function that handles a specific endpoint in the Flask application. Each of these files contains functions that respond to various ad operations:
 
-##### add_announcement.py: Defines a function for adding new announcements.
-##### add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
-##### complete_announcement.py: Supports marking announcements as completed.
-##### delete_announcement.py: Defines a function to delete announcements.
-##### delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
-##### get_announcements.py: Responsible for searching and returning announcements.
-##### get_user_announcements.py: Handles retrieving user announcements.
-##### get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
-##### restore_announcement.py: Supports restoring deleted announcements.
-##### update_announcement.py: Defines a function to update existing announcements.
-Each of these files exports a function that is then assigned to the appropriate endpoint in the blueprint announcements_bp defined in the __init__.py file.
+##### /routes/announcements/add_announcement.py: Defines a function for adding new announcements.
+##### /routes/announcements/add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
+##### /routes/announcements/complete_announcement.py: Supports marking announcements as completed.
+##### /routes/announcements/delete_announcement.py: Defines a function to delete announcements.
+##### /routes/announcements/delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
+##### /routes/announcements/get_announcements.py: Responsible for searching and returning announcements.
+##### /routes/announcements/get_user_announcements.py: Handles retrieving user announcements.
+##### /routes/announcements/get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
+##### /routes/announcements/restore_announcement.py: Supports restoring deleted announcements.
+##### /routes/announcements/update_announcement.py: Defines a function to update existing announcements.
 
+#### Media:
+/routes/media/__init__.py:
+- The __init__.py file defines the blueprint for media operations in a Flask application. It imports various view functions responsible for media file operations, such as uploading, deleting, switching, and downloading media. The media_bp blueprint is then created and assigned various URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
 
+Files in the /routes/media directory define functions that handle specific endpoints related to media operations in the Flask application. Each of these files contains a function responsible for different media file operations:
 
-/routes/media:
-/routes/messages:
-/routes/users:
+##### /routes/media/delete_media.py: Defines a function for deleting media files.
+##### /routes/media/download_media.py: Contains a function responsible for downloading media files.
+##### /routes/media/switch_media: Supports the feature of replacing the main photo in the database.
+##### /routes/media/switch_media: Defines a function for uploading new media files.
+
+#### Messages:
+/routes/messages/__init__.py:
+- The __init__.py file defines the blueprint for message-related operations in a Flask application. It imports view functions responsible for getting messages, sending messages, and retrieving conversations. The messages_bp blueprint is created and various URL rules are assigned to it, mapping to the appropriate view functions and specifying the HTTP methods that can be used to invoke these functions.
+
+Files in the /routes/messages directory define functions that handle specific endpoints related to messaging operations in the Flask application:
+
+##### /routes/messages/get_conversations.py: Contains a function to retrieve conversations for a specific user.
+##### /routes/messages/get_messages.py: Defines a function for retrieving messages for a specific user. 
+##### /routes/messages/send_message.py: Contains a function for sending messages from a specific user.
+
+#### Users:
+/routes/users/__init__.py:
+- The __init__.py file defines the blueprint for user-related operations in a Flask application. It imports various view functions responsible for functionalities such as user login, login verification, user registration, updating user details, and deleting user accounts. The users_bp blueprint is created and assigned different URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
+
+Within the /routes/users directory, each file handles specific endpoints related to user management:
+##### /routes/users/delete_user.py: Defines a function for deleting a user account.
+##### /routes/users/login_user.py: Contains a function for user login.
+##### /routes/users/register_user.py: Defines a function for user registration.
+##### /routes/users/update_user.py: Contains a function for updating user details.
+##### /routes/users/verify_login.py: Checks whether a given login is free and whether the user can use it to create an account.
 
 ### Utils:
 /utils/config.py:
+- The config.py file defines a configuration object for the Flask application that sets configuration parameters:
+##### UPLOAD_FOLDER: Defines where user media files are stored, fetched from environment variables.
+##### MAX_CONTENT_LENGTH: Limits file uploads to 3 MB.
+##### MAX_FILE_LENGTH: Restricts individual file size within ZIP archives to 200 KB.
 
 /utils/database_connection.py:
+- database_connection.py enables connecting to a MySQL database in a Flask application using environment variables for database configuration. It imports mysql.connector for database connectivity and os for accessing environment variables. The database_connect() function retrieves database credentials (DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE) from environment variables and establishes a connection to the MySQL database. It returns the database connection object for use throughout the application, ensuring secure and configurable database access. This approach centralizes database configuration, enhancing maintainability and security in the application's database interactions.
 
 /utils/register_blueprints.py:
+- register_blueprints.py is a script that organizes Flask application routes into modular blueprints for announcements, messages, users, and media. Each blueprint (announcements_bp, messages_bp, users_bp, media_bp) encapsulates related routes, enhancing code organization and scalability. Blueprints are registered with optional URL prefixes (/users, /media) to structure API endpoints logically within the application. This modular approach promotes maintainability and clarity in routing configuration for the Flask application.
 
 /utils/helpers.py:
+- The helpers.py file contains functions that support various operations in a Flask application. validation_file_extension validates the extension of uploaded graphic files based on allowed extensions defined in an environment variable. create_query_for_search_engine dynamically creates a database query for searching announcements using additional parameters. create_query_for_getting_messages constructs a query to retrieve messages for a specific conversation ID from the database, converting DATETIME objects to strings for easier handling. These functions facilitate data manipulation, database interaction, and file validation within the Flask application.
 
 /utils/formating.py:
+- The formating.py file provides a function to convert an image file to a base64-encoded string using Python's base64 module.
 
-### Media:
+### Media
 /media/media_root:
-
-
+- The folder where all files added by application users are saved.
 
 
 ## Features
@@ -94,7 +106,7 @@ Each of these files exports a function that is then assigned to the appropriate 
 - Automatic file renaming if required.
 - Adding graphic files to the server.
 - Deleting graphic files from the server.
-- Downloading graphic files from the server.
+- Downloading graphic files from the server in the form of base 64 and zip file packages.
 - Returning a collection of records in a pagination system.
 - File upload size validation.
 - Intelligent creation of a query to the database when the user wants to download announcements with specific parameters.
@@ -138,7 +150,7 @@ Each of these files exports a function that is then assigned to the appropriate 
 
 `UPLOAD_FOLDER`=Path to the created upload folder.
 
-`ALLOWED_EXTENSIONS`=png,jpg,...
+`ALLOWED_EXTENSIONS`=jpg,jpeg,png
 
 
 ##### Tables for database:
@@ -310,7 +322,7 @@ CREATE TABLE `favorite_announcements` (
 ```bash
  app.run(debug=True, port=(set your own port))
 ```
-- If you want connect desktop SHOPER.app program with local backend u need to change endpoints in [Shoper-app-frontend/Backend_requests.py](https://github.com/Grzegorz96/Shoper-app-frontend/blob/master/Backend_requests.py) on:
+- If you want connect desktop SHOPER.app program with local backend u need to change endpoints in [Shoper-app-frontend/utils/constants.py](https://github.com/Grzegorz96/Shoper-app-frontend/blob/master/utils/constants.py) on:
 ```bash
  url = "http://localhost:5000/endpoint"
 ```
@@ -320,13 +332,13 @@ CREATE TABLE `favorite_announcements` (
 
 #### HTTP GET METHODS:
 
-##### 1. Endpoint to the function that downloads a file from the server using the submitted path. JSON={"path":string}.
+##### 1. Endpoint to the function for downloading files from the server and returning them as a ZIP package using an announcement identifier from the URL.
 ```http
-  GET /media/download
+  GET /media/download/announcements/<int:announcement_id>
 ```
-| Resource  | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `media`   | `string` | **Required** Getting a photo from the path included in request_body. |
+| Resource  | Type     | Description                | Sub-resource  | Type     | Description                | Sub-resource id  | Type     | Description  
+| :-------- | :------- | :------------------------- | :------------ | :------- | :------------------------- | :--------------- | :------- | :------------------------- |
+| `media`   | `string` | **Required**  Reference to media resource. | `announcements` | `string` | **Required**  Reference to annoucements sub-resource. |  `announcement_id` | `int` |  **Required** ID to specify the announcement. |
 
 ##### 2. Endpoint to the function that downloads a file paths from the database using information from url.
 ```http
