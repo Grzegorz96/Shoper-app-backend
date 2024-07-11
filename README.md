@@ -1,24 +1,88 @@
 ![shoperlogo](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/7b68b20e-006b-47bc-8823-8c00e62282ca)
 API for SHOPER.app
 
-The SHOPER API contains the necessary endpoints for the proper operation of the entire project. It supports the database and performs operations on multimedia files located on the server. Using functions, the user can perform all database-related operations. Thanks to extensive server-side validation, users will not be able to enter information in the database that does not meet the requirements. Validation also applies to files located on the server, an appropriate user directory is created for each file, and the file itself is validated in detail. In the project, I paid particular attention to the completeness of data and, in case of errors, returning an appropriate response with an appropriate status code. The program can be run on Windows and Linux.
+The SHOPER API contains endpoints necessary for the proper operation of the entire project. It supports the database and performs operations on multimedia files located on the server. Using the function, the user can perform any operations related to databases. Thanks to extensive server-side validation, users will not be able to enter information into the database that does not meet the requirements. Files located on the server are also validated, an appropriate user directory is created for each file, and the file itself is verified in detail. In the project, I paid particular attention to the completeness of data and, in case of errors, to returning an appropriate response with an appropriate status code, as well as to optimizing the code related to graphic file management. The program can be run on Windows and Linux systems.
 
 
-## Description of the modules
+## Table of Contents
 
-The program consists of 4 modules, each of which plays a unique role in the functioning of the application. Below is a brief description of each module:
+- [Description of folders and modules](#Description-of-folders-and-modules)
+- [Features](#Features)
+- [Technology used](#Technology-used)
+- [Installation](#Installation)
+- [Lessons learned](#Lessons-learned)
+- [Authors](#Authors)
+- [Contact](#Contact)
+- [License](#License)
+- [Screnshoots](#Screnshoots)
 
-Database_connection.py:
-- The Database_conection.py module is responsible for creating a connection to the database. It retrieves necessary data from environment variables and uses them to connect to the MySQL server.
 
-Media_validator.py:
-- The Media_validator.py module contains a function for validating uploaded graphic files, this module checks whether the entered file meets the specified requirements. It obtains allowed extensions from environment variables.
+## Description of folders and modules
 
-Query_creator.py:
-- The Query_creator.py module contains two functions. The first one dynamically creates a database query based on user search preferences, while the second one retrieves messages for a given conversation and converts DATETIME objects to strings.
+### Core:
+/app.py:
+- app.py file is the main script for a Flask web application. It first loads environment variables using dotenv, then creates a Flask application object and configures it using the Config class. It registers blueprints defined in the application through the register_blueprints function. Finally, it runs the Flask server on port 5000 in debug mode, which is useful during development.
 
-API.py:
-- The API.py is central module of the program, API.py handles all operations related to the database and server. It includes functions for uploading, downloading, and deleting multimedia files from the server. Additionally, it provides functionalities such as downloading photo paths and changing main announcement photos. Functions in this module contains server-side validation, preventing users from entering invalid data into the database. The transmitted parameters and request body of the request are also validated. Resource ids are converted at the endpoint level, which provides additional validation if someone would like to connect to the endpoint by entering a value other than integer as the resource or subresource id. Thanks to the calculated offset parameter, which receives data for calculations from information sent by the user, the program functions that retrieve data from the database can easily paginate records. The function for adding photos also has the option of changing the name of the added photo, which prevents the photos from being overwritten on the server. If the same user wants to add a photo with the same name, the program will check it and add _2, _3, etc. to the end of the file name. User folders on the server are also created automatically when a photo is added to the server for the first time. All database operations are wrapped in try-except clauses for proper error handling.
+### Routes:
+#### Announcements:
+/routes/announcements/__init.py__:
+- The __init__.py file defines the blueprint for Flask announcements. Imports various views (functions) responsible for operations on advertisements, such as adding, updating, deleting, restoring, marking as completed, and managing favorite advertisements. Then, blueprint announcements_bp is created and assigned various URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
+There is a set of files in the /routes/announcements directory, each of which defines a function that handles a specific endpoint in the Flask application. Each of these files contains functions that respond to various ad operations:
+
+add_announcement.py: Defines a function for adding new announcements.
+add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
+complete_announcement.py: Supports marking announcements as completed.
+delete_announcement.py: Defines a function to delete announcements.
+delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
+get_announcements.py: Responsible for searching and returning announcements.
+get_user_announcements.py: Handles retrieving user announcements.
+get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
+restore_announcement.py: Supports restoring deleted announcements.
+update_announcement.py: Defines a function to update existing announcements.
+Each of these files exports a function that is then assigned to the appropriate endpoint in blueprint announcements_bp defined in the __init__.py file.
+
+
+### Routes:
+#### Announcements
+/routes/announcements/__init__.py:
+
+- The __init__.py file defines the blueprint for Flask announcements. It imports various views (functions) responsible for operations on advertisements, such as adding, updating, deleting, restoring, marking as completed, and managing favorite advertisements. Then, the blueprint announcements_bp is created and assigned various URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
+
+There is a set of files in the /routes/announcements directory, each of which defines a function that handles a specific endpoint in the Flask application. Each of these files contains functions that respond to various ad operations:
+
+##### add_announcement.py: Defines a function for adding new announcements.
+##### add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
+##### complete_announcement.py: Supports marking announcements as completed.
+##### delete_announcement.py: Defines a function to delete announcements.
+##### delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
+##### get_announcements.py: Responsible for searching and returning announcements.
+##### get_user_announcements.py: Handles retrieving user announcements.
+##### get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
+##### restore_announcement.py: Supports restoring deleted announcements.
+##### update_announcement.py: Defines a function to update existing announcements.
+Each of these files exports a function that is then assigned to the appropriate endpoint in the blueprint announcements_bp defined in the __init__.py file.
+
+
+
+/routes/media:
+/routes/messages:
+/routes/users:
+
+### Utils:
+/utils/config.py:
+
+/utils/database_connection.py:
+
+/utils/register_blueprints.py:
+
+/utils/helpers.py:
+
+/utils/formating.py:
+
+### Media:
+/media/media_root:
+
+
 
 
 ## Features
