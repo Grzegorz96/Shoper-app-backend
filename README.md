@@ -340,31 +340,23 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :------- | :------------------------- | :------------ | :------- | :------------------------- | :--------------- | :------- | :------------------------- |
 | `media`   | `string` | **Required**  Reference to media resource. | `announcements` | `string` | **Required**  Reference to annoucements sub-resource. |  `announcement_id` | `int` |  **Required** ID to specify the announcement. |
 
-##### 2. Endpoint to the function that downloads a file paths from the database using information from url.
-```http
-  GET /announcements/<int:announcement_id>/media/paths?main_photo_flag=
-```
-| Resource        | Type    | Description               | Resource id | Type    | Description                | Parameter | Type    | Description  |
-| :--------       | :-------| :-------------------------| :--------   | :-------| :------------------------- | :-------  | :-------| :------------|
-| `announcements` | `string`| **Required** Getting a photo paths to announcement from announcements_main_photo or announcements_media tables. | `announcement_id` | `int` | **Required** ID to specify the announcement. | `main_photo_flag` | `int` | **Required** Allowed values: 1/0, specifies whether to get paths from the announcements_media table or from the announcements_main_photo table. |
-
-##### 3. Endpoint to the function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
+##### 2. Endpoint to the function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 ```http
   GET /users/login
 ```
 | Resource  | Type    | Description                |
 | :-------- | :-------| :------------------------- |
-| `users`   | `string`| **Required** Getting user data from the users table, using data from the request body. |
+| `users`   | `string`| **Required**  Reference to users resource. |
 
-##### 4. Endpoint to the function that downloads user's announcements from the database using information from url.
+##### 3. Endpoint to the function that downloads user's announcements from the database using information from url.
 ```http
-  GET /users/<int:user_id>/announcements?active_flag=&per_page=&page=
+  GET /announcements/users/<int:user_id>?active_flag=&per_page=&page=
 ```
-| Resource  | Type    | Description  | Resource id | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
+| Resource  | Type    | Description  | Sub-resource | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
-| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `announcements`| `string`| **Required** Getting user's announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `announcements`   | `string`| **Required** Reference to announcements resource. | `users`| `string`| **Required** Reference to users sub-resource | `user_id`| `int`| **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
-##### 5. Endpoint to the function that informs the user whether a given login is available. JSON={"login":string}.
+##### 4. Endpoint to the function that informs the user whether a given login is available. JSON={"login":string}.
 ```http
   GET /users/login-verification
 ```
@@ -372,7 +364,7 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Verification whether the login transmitted in the request body isn't included in the database. | 
 
-##### 6. Endpoint to the function that downloads user's favorite announcements from the database using information from url.
+##### 5. Endpoint to the function that downloads user's favorite announcements from the database using information from url.
 ```http
   GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
 ```
@@ -380,7 +372,7 @@ CREATE TABLE `favorite_announcements` (
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
 | `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
-##### 7. Endpoint to the function that downloads announcements from the database using information from parameters.
+##### 6. Endpoint to the function that downloads announcements from the database using information from parameters.
 ```http
   GET /announcements/search?per_page=&page=&q=&l=&c=
 ```
@@ -388,7 +380,7 @@ CREATE TABLE `favorite_announcements` (
 | :--------       | :-------| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------|
 | `announcements` | `string`| **Required** Getting all announcements for specific parameters. | `per_age` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
 
-##### 8. Endpoint to the function that downloads user's messages from the database. JSON={"conversation_id":integer, "announcement_id":integer}.
+##### 7. Endpoint to the function that downloads user's messages from the database. JSON={"conversation_id":integer, "announcement_id":integer}.
 ```http
   GET /users/<int:user_id>/messages
 ```
@@ -396,7 +388,7 @@ CREATE TABLE `favorite_announcements` (
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
 | `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Getting messages for a given user when specifying conversation_id or announcement_id in request_body. | 
 
-##### 9. Endpoint to the function that downloads user's conversations from the database using information from url.
+##### 8. Endpoint to the function that downloads user's conversations from the database using information from url.
 ```http
   GET /users/<int:user_id>/conversations?customer_flag=&per_page=&page=
 ```
