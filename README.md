@@ -352,9 +352,9 @@ CREATE TABLE `favorite_announcements` (
 ```http
   GET /announcements/users/<int:user_id>?active_flag=&per_page=&page=
 ```
-| Resource  | Type    | Description  | Sub-resource | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
+| Resource  | Type    | Description  | Sub-resource | Type    | Description | Sub-resource id | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
-| `announcements`   | `string`| **Required** Reference to announcements resource. | `users`| `string`| **Required** Reference to users sub-resource | `user_id`| `int`| **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `announcements`   | `string`| **Required** Reference to announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `int`| **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
 ##### 4. Endpoint to the function that informs the user whether a given login is available. JSON={"login":string}.
 ```http
@@ -362,15 +362,15 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Verification whether the login transmitted in the request body isn't included in the database. | 
+| `users`   | `string`| **Required** Reference to users resource. | 
 
 ##### 5. Endpoint to the function that downloads user's favorite announcements from the database using information from url.
 ```http
-  GET /users/<int:user_id>/favorite-announcements?active_flag=&per_page=&page=
+  GET /favorite-announcements/users/<int:user_id>?active_flag=&per_page=&page=
 ```
-| Resource  | Type | Description | Resource id | Type| Description  | Sub-resource | Type| Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
+| Resource  | Type | Description | Sub-resource | Type | Description  | Sub-resource id | Type| Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
-| `users`   | `string`| **Required** Reference to users resource. | `user_id`| `int`| **Required** ID to specify the user. | `favorite-announcements`| `string`| **Required** Getting user's favorite announcements. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `int` | **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
 
 ##### 6. Endpoint to the function that downloads announcements from the database using information from parameters.
 ```http
@@ -378,33 +378,33 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :--------       | :-------| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------|
-| `announcements` | `string`| **Required** Getting all announcements for specific parameters. | `per_age` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
+| `announcements` | `string`| **Required**  Reference to announcements resource. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
 
-##### 7. Endpoint to the function that downloads user's messages from the database. JSON={"conversation_id":integer, "announcement_id":integer}.
+##### 7. Endpoint to the function that downloads messages from the database for a given user when specifying conversation_id or announcement_id in request_body. JSON={"conversation_id":integer, "announcement_id":integer}.
 ```http
-  GET /users/<int:user_id>/messages
+  GET /messages/users/<int:user_id>
 ```
-| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
-| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Getting messages for a given user when specifying conversation_id or announcement_id in request_body. | 
+| Resource  | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id | Type    | Description            | 
+| :-------- | :-------| :------------------------- | :--------     | :-------| :------------------------- | :--------       | :-------| :----------------------| 
+| `messages`   | `string`| **Required** Reference to messages resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user.| 
 
-##### 8. Endpoint to the function that downloads user's conversations from the database using information from url.
+##### 8. Endpoint to the function that downloads user's conversations from the database using information from url as a customer and seller.
 ```http
-  GET /users/<int:user_id>/conversations?customer_flag=&per_page=&page=
+  GET /conversations/users/<int:user_id>?customer_flag=&per_page=&page=
 ```
 | Resource  | Type    | Description | Resource id  | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :-------- | :-------| :-----------| :--------    | :-------| :-----------| :--------    | :-------| :-----------| :-------- | :----| :----------- | :-------- | :----| :----------- | :-------- | :----| :----------- |
-| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `conversations` | `string`| **Required** Getting a user's conversation as a buyer or as seller. | `customer_flag` | `int`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a buyer. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | 
+| `conversations`   | `string`| **Required** Reference to conversations resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. | `customer_flag` | `int`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a customer. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | 
 
 #### HTTP POST METHODS:
 
-##### 1. Endpoint to the function that adds a graphic file to the server and its path to the database. FILES={"file":file.jpg}.
+##### 1. Endpoint to the function that validates, unpacks the zip package with graphic files and then adds them to the database and server. files={"file": ("images.zip", zip_buffer, "application/zip")}, DATA={"main_photo_index":integer, "announcement_id":integer}
 ```http
-  POST /media/upload/<user_id>?main_photo_flag=&announcement_id=
+  POST /media/upload/users/<user_id> 
 ```
-| Resource | Type    | Description                | Resource id | Type    | Description                | Parameter   | Type    | Description                | Parameter   |    Type |               Description  |
-| :--------| :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- | :--------   | :-------| :------------------------- |
-| `media`  | `string`| **Required** Upload a graphic file sent in files to the server and save its path in the database. | `user_id`| `int`| **Required** ID to specify the user. |  `main_photo_flag`| `int`| **Required** Allowed values: 1/0, specifying whether the photo should be saved in the database as the main one or not. | `announcement_id`| `int`| **Required** Allowed values: >1, specifying which announcement the uploaded file refers to.|
+| Resource | Type    | Description                | Sub-resource | Type    | Description                | Sub-resource id | Type    | Description                 | 
+| :--------| :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------       | :-------| :-------------------------  |
+| `media`  | `string`| **Required** Reference to media resource. | `users`| `string`| **Required** Reference to users sub-resource.| `user_id`| `int`| **Required** ID to specify the user. | 
 
 ##### 2. Endpoint to the function that adds a user to the database. JSON={"first_name":string, "last_name":string, "email":string, "login":string, "password":string, "date_of_birth:string, "street":string, "zip_code":string, "city":string}.
 ```http
@@ -412,75 +412,75 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Adding a new user to the users table. The data is downloaded from the request body. | 
+| `users`   | `string`| **Required** Reference to users resource.| 
 
-##### 3. Endpoint to the function that adds announcements to the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer, "category_id":integer}.
+##### 3. Endpoint to the function that adds announcements to the database for specific user. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer, "category_id":integer}.
 ```http
-  POST /users/<int:user_id>/announcements
+  POST /announcements/users/<int:user_id>
 ```
-| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| Resource  | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `announcements` | `string`| **Required** Adding an announcement by a specific user, with data sent via request body. |
+| `announcements`   | `string`| **Required** Reference to announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int` |  **Required** ID to specify the user. |
 
 ##### 4. Endpoint to the function that adds favorite announcement to the database. JSON={"announcement_id":integer}.
 ```http
-  POST /users/<int:user_id>/favorite-announcements
+  POST /favorite-announcements/users/<int:user_id>
 ```
-| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| Resource  | Type    | Description                | Sub-Resource | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `favorite-announcements` | `string`| **Required** Adding the announcement sent in request data to the user's favorites. |
+| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
 
 ##### 5. Endpoint to the function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":bool, "content":string}.
 ```http
-  POST /users/<int:user_id>/messages
+  POST /messages/users/<int:user_id>
 ```
-| Resource  | Type    | Description                | Resource id  | Type    | Description                | Sub-resource | Type    | Description                | 
+| Resource  | Type    | Description                | Sub-Resource | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `users`   | `string`| **Required** Reference to users resource. | `users_id` | `int`| **Required** ID to specify the user. | `messages` | `string`| **Required** Adding a message by a specific user with specific data sent in the request body. |
+| `messages`| `string`| **Required** Reference to messages resource. | `users_id` | `int`|**Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
 
 #### HTTP PATCH METHODS:
 
-##### 1. Endpoint to the function that updates one value for the user. JSON={"column":string, "value":string}.
+##### 1. Endpoint to the function that updates one value for the specific user. JSON={"column":string, "value":string}.
 ```http
   PATCH /users/<int:user_id>
 ```
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `users`   | `string`| **Required** Updating a specific user field with data sent in the request body. | `users_id` | `int`| **Required** ID to specify the user. | 
+| `users`   | `string`|  **Required** Reference users resource.  | `users_id` | `int`| **Required** ID to specify the user. | 
 
-##### 2. Endpoint to the function that changes the announcement from active to completed.
+##### 2. Endpoint to the function that changes the specific announcement from active to completed. Updating the flag for a given announcement from active to completed.
 ```http
   PATCH /announcements/<int:announcement_id>/complete
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Updating the flag for a given announcement from active to completed. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
-##### 3. Endpoint to the function that changes the announcement from completed to active.
+##### 3. Endpoint to the function that changes the specific announcement from completed to active. Updating the flag for a given announcement from completed to active.
 ```http
   PATCH /announcements/<int:announcement_id>/restore
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to active. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
-##### 4. Endpoint to the function that changes the announcement from completed to deleted.
+##### 4. Endpoint to the function that changes the specific announcement from completed to deleted. Updating the flag for a given announcement from completed to deleted.
 ```http
   PATCH /announcements/<int:announcement_id>/delete
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Updating the flag for a given announcement from completed to deleted. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
 
 #### HTTP PUT METHODS:
 
-##### 1. Endpoint to the function that transfers the path from the photo table to the main photo table and vice versa. JSON={"main_photo_path":string, "media_photo_path":string, "announcement_id":integer}.
+##### 1. Endpoint to the function that transfers the path from announcements_media to the announcements_main_photo table and vice versa for specific announcement. JSON={"main_photo_filename":string, "media_photo_filename":string, "announcement_id":integer}.
 ```http
-  PUT /media/switch/<int:user_id>?to_media_flag=&to_main_flag=
+  PUT /media/switch/users/<int:user_id>
 ```
-| Resource        | Type    | Description                | Resource id  | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                | 
-| :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
-| `media` | `string`| **Required** Deletes a record from one table and creates it in another table. Transferring paths between the announcements_main_photo table and the announcements_media. | `user_id` | `int`| **Required** ID to specify the user who owns the image files. |  `to_media_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request body from main_photo to media. | `to_main_flag` | `int`| **Required** Allowed values: 1/0, determining whether the user wants to transfer the transmitted paths in request_body from media to main_photo.| 
+| Resource  | Type    | Description                | Sub-resource | Type    | Description                | Sub-resource id | Type    | Description                |  
+| :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `media`   | `string`| **Required** Reference media resource.  | `users` | `string`| **Required** Reference users sub-resource. |  `user_id` | `int`|  **Required** ID to specify the user. |  
 
 ##### 2. Endpoint to the function that updates the entire announcement record in the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer}.
 ```http
@@ -488,30 +488,37 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Updating a specific announcement with data sent in the request body. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
 
 #### HTTP DELETE METHODS:
 
-##### 1. Endpoint to the function that removes photos from the server and their paths from the database.
+##### 1. Endpoint to the function that removes photos from the server and their paths from the database. JSON={"files": {"filename":string, "is_main_photo":bool}, ...}
 ```http
-  DELETE /media/delete?main_photo_flag=&path=
+  DELETE /media/delete/users/<int:user_id>
 ```
-| Resource        | Type    | Description                | Parameter  | Type    | Description                | Parameter  | Type    | Description                |
+| Resource        | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id  | Type    | Description       |
 | :--------       | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
-| `media` | `string`| **Required** Deleting the photo from the server and its path from the database using the information from the parameters. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | `main_photo_flag` | `int`| **Required** Allowed values: 1/0, determines whether the user deletes the main photo or not. | `path` | `string`| **Required** Path to the saved photo on the server. |
+| `media` | `string`| **Required** Reference media resource. | `users` | `string`|  **Required** Reference users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
 
-##### 2. Endpoint to the function that removes favorite announcements from the database.
+##### 2. Endpoint to the function that removes favorite announcements from the database for specific favorite announcement.
 ```http
   DELETE /favorite-announcements/<int:favorite_announcement_id>
 ```
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `favorite-announcements` | `string`| **Required** Removing an announcement from the user's favorite announcements. | `favorite_announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
+| `favorite-announcements` | `string`| **Required** Reference favorite-announcements resource. | `favorite_announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
 
+##### 3. Endpoint to the function that sets a specific user's active flag to 0, resulting in their account being disabled.
+```http
+  DELETE /users/<int:user_id>
+```
+| Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
+| :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
+| `users` | `string`| **Required** Reference users resource. | `user_id` | `int`| **Required** ID to specify the user. |
 
 ## Lessons learned
 
-Writing a backend for a Shoper project taught me a lot. I learned how to operate on multimedia files via the http protocol. I made sure to validate the entered data and handle each error appropriately. I improved my knowledge of the SQL language, designing tables and the relationships between them was a challenge for me. Initially, the front-end program worked without an API, I had to create the necessary functions and properly connect them to the second program. While writing the program, I had to solve many problems and it was from the Shoper program that I learned the most. I had to create a coherent program that operated on files on the server and data in the database. Any failure on the server should result in failure to perform the operation on the database and vice versa. Everything must work coherently. I had to implement a backend application with database on a cloud server. It took me about 2 months to write a coherently functioning program (frontend + backend + database), during which time my skills and knowledge improved significantly.
+Writing a backend for a Shoper project taught me a lot. I learned how to operate on multimedia files via the http protocol. I made sure to validate the entered data and handle each error appropriately. I improved my knowledge of the SQL language, designing tables and the relationships between them was a challenge for me. Initially, the front-end program worked without an API, I had to create the necessary functions and properly connect them to the second program. While writing the program, I had to solve many problems and it was from the Shoper program that I learned the most. I had to create a coherent program that operated on files on the server and data in the database. Any failure on the server should result in failure to perform the operation on the database and vice versa. Everything must work coherently. I had to redesign the logic of file operations on the server, the previous logic was too poorly optimized, which resulted in a very long waiting time for downloading and sending multimedia files in production. I have optimized it by reducing the number of queries, all graphic files are sent and received in a zip package and the main photos for advertisements are attached in the response along with the advertisements in base 64 format. I had to implement a backend application with database on a cloud server. It took me about 3 months to write a coherently functioning program (frontend + backend + database), during which time my skills and knowledge improved significantly.
 
 
 ## Features to be implemented
@@ -519,7 +526,6 @@ Writing a backend for a Shoper project taught me a lot. I learned how to operate
 - Password recovery and change function via a code sent to email.
 - Hashing of user passwords in the database.
 - JSON Web Tokens system.
-- Changing the function returning graphic files to return the entire package of files to the frontend. This will improve the optimization of the front-end program, reduce the number of photo queries and reduce the load on the back-end application.
 
 
 ## Authors
@@ -534,8 +540,7 @@ E-mail: grzesstrzeszewski@gmail.com
 
 ## License
 
-[MIT](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/LICENSE.md)
-
+[AGPL-3.0 license](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/LICENSE.md)
 
 ## Screnshoots
 ##### Users table
