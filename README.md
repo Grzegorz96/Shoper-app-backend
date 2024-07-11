@@ -50,7 +50,7 @@ Files in the /routes/media directory define functions that handle specific endpo
 ##### /routes/media/delete_media.py: Defines a function for deleting media files.
 ##### /routes/media/download_media.py: Contains a function responsible for downloading media files.
 ##### /routes/media/switch_media: Supports the feature of replacing the main photo in the database.
-##### /routes/media/switch_media: Defines a function for uploading new media files.
+##### /routes/media/upload_media: Defines a function for uploading new media files.
 
 #### Messages:
 /routes/messages/__init__.py:
