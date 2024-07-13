@@ -338,7 +338,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type     | Description                | Sub-resource  | Type     | Description                | Sub-resource id  | Type     | Description  
 | :-------- | :------- | :------------------------- | :------------ | :------- | :------------------------- | :--------------- | :------- | :------------------------- |
-| `media`   | `string` | **Required**  Reference to media resource. | `announcements` | `string` | **Required**  Reference to annoucements sub-resource. |  `announcement_id` | `int` |  **Required** ID to specify the announcement. |
+| `media`   | `string` | **Required**  Reference to media resource. | `announcements` | `string` | **Required**  Reference to annoucements sub-resource. |  `announcement_id` | `integer` |  **Required** ID to specify the announcement. |
 
 ##### 2. Endpoint to the function that downloads data about user from the database. JSON={"login_or_email":string, "password":string}.
 ```http
@@ -354,7 +354,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description  | Sub-resource | Type    | Description | Sub-resource id | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :-------- | :-------| :------------| :--------   | :-------| :-----------| :--------    | :------- | :----------| :-------- | :-------| :------------| :--------   | :-------| :-----------| :---| :--| :-------|
-| `announcements`   | `string`| **Required** Reference to announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `int`| **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `announcements`   | `string`| **Required** Reference to announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `integer`| **Required** ID to specify the user. | `active_flag`| `integer`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `integer`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `integer`| **Required** Allowed values: >0, specifying which page to return. |
 
 ##### 4. Endpoint to the function that informs the user whether a given login is available. JSON={"login":string}.
 ```http
@@ -370,7 +370,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type | Description | Sub-resource | Type | Description  | Sub-resource id | Type| Description | Parameter | Type | Description  | Parameter | Type | Description | Parameter | Type | Description |
 | :--| :--| :-----| :---| :------| :-----| :--------    | :------- | :------| :--------    | :------- | :-----| :--------    | :------- | :-----| :--------    | :------- | :------------------------- |
-| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `int` | **Required** ID to specify the user. | `active_flag`| `int`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `int`| **Required** Allowed values: >0, specifying which page to return. |
+| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users`| `string`| **Required** Reference to users sub-resource. | `user_id`| `integer` | **Required** ID to specify the user. | `active_flag`| `integer`| **Required** Allowed values: 1/0, specifying whether to download active or completed announcements. | `per_page`| `integer`| **Required** Allowed values: >0, specifying how many objects to return. | `page`| `integer`| **Required** Allowed values: >0, specifying which page to return. |
 
 ##### 6. Endpoint to the function that downloads announcements from the database using information from parameters.
 ```http
@@ -378,7 +378,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :--------       | :-------| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------| :-------- | :----| :------------|
-| `announcements` | `string`| **Required**  Reference to announcements resource. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `int`| **Not Required** Specifying the category number to which the announcements belongs. | 
+| `announcements` | `string`| **Required**  Reference to announcements resource. | `per_page` | `integer`| **Required** Allowed values: >0, specifying how many objects to return. |  `page` | `integer`| **Required** Allowed values: >0, specifying which page to return. | `q` | `string`| **Not Required** Specifying the phrase that must be included in the title of the announcements. | `l` | `string`| **Not Required** Specifying the location from which the announcements comes. |  `c` | `integer`| **Not Required** Specifying the category number to which the announcements belongs. | 
 
 ##### 7. Endpoint to the function that downloads messages from the database for a given user when specifying conversation_id or announcement_id in request_body. JSON={"conversation_id":integer, "announcement_id":integer}.
 ```http
@@ -386,15 +386,15 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id | Type    | Description            | 
 | :-------- | :-------| :------------------------- | :--------     | :-------| :------------------------- | :--------       | :-------| :----------------------| 
-| `messages`   | `string`| **Required** Reference to messages resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user.| 
+| `messages`   | `string`| **Required** Reference to messages resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user.| 
 
 ##### 8. Endpoint to the function that downloads user's conversations from the database using information from url as a customer and seller.
 ```http
   GET /conversations/users/<int:user_id>?customer_flag=&per_page=&page=
 ```
-| Resource  | Type    | Description | Resource id  | Type    | Description | Sub-resource | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
+| Resource  | Type    | Description | Sub-resource  | Type    | Description | Sub-resource id | Type    | Description | Parameter | Type | Description  | Parameter | Type | Description  | Parameter | Type | Description  |
 | :-------- | :-------| :-----------| :--------    | :-------| :-----------| :--------    | :-------| :-----------| :-------- | :----| :----------- | :-------- | :----| :----------- | :-------- | :----| :----------- |
-| `conversations`   | `string`| **Required** Reference to conversations resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. | `customer_flag` | `int`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a customer. | `per_page` | `int`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `int`| **Required** Allowed values: >0, specifying which page to return. | 
+| `conversations`   | `string`| **Required** Reference to conversations resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. | `customer_flag` | `integer`| **Required** Allowed values: 1/0, specifies whether the user wants to download conversations as a seller or as a customer. | `per_page` | `integer`| **Required** Allowed values: >0, specifying how many objects to return. | `page` | `integer`| **Required** Allowed values: >0, specifying which page to return. | 
 
 #### HTTP POST METHODS:
 
@@ -404,7 +404,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource | Type    | Description                | Sub-resource | Type    | Description                | Sub-resource id | Type    | Description                 | 
 | :--------| :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------       | :-------| :-------------------------  |
-| `media`  | `string`| **Required** Reference to media resource. | `users`| `string`| **Required** Reference to users sub-resource.| `user_id`| `int`| **Required** ID to specify the user. | 
+| `media`  | `string`| **Required** Reference to media resource. | `users`| `string`| **Required** Reference to users sub-resource.| `user_id`| `integer`| **Required** ID to specify the user. | 
 
 ##### 2. Endpoint to the function that adds a user to the database. JSON={"first_name":string, "last_name":string, "email":string, "login":string, "password":string, "date_of_birth:string, "street":string, "zip_code":string, "city":string}.
 ```http
