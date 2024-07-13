@@ -30,16 +30,16 @@ The SHOPER API contains endpoints necessary for the proper operation of the enti
 
 There is a set of files in the /routes/announcements directory, each of which defines a function that handles a specific endpoint in the Flask application. Each of these files contains functions that respond to various ad operations:
 
-##### /routes/announcements/add_announcement.py: Defines a function for adding new announcements.
-##### /routes/announcements/add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
-##### /routes/announcements/complete_announcement.py: Supports marking announcements as completed.
-##### /routes/announcements/delete_announcement.py: Defines a function to delete announcements.
-##### /routes/announcements/delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
-##### /routes/announcements/get_announcements.py: Responsible for searching and returning announcements.
-##### /routes/announcements/get_user_announcements.py: Handles retrieving user announcements.
-##### /routes/announcements/get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
-##### /routes/announcements/restore_announcement.py: Supports restoring deleted announcements.
-##### /routes/announcements/update_announcement.py: Defines a function to update existing announcements.
+###### /routes/announcements/add_announcement.py: Defines a function for adding new announcements.
+###### /routes/announcements/add_announcement_to_favorites.py: Contains a function to add announcements to favorites.
+###### /routes/announcements/complete_announcement.py: Supports marking announcements as completed.
+###### /routes/announcements/delete_announcement.py: Defines a function to delete announcements.
+###### /routes/announcements/delete_announcement_from_favorites.py: Contains a function to remove announcements from favorites.
+###### /routes/announcements/get_announcements.py: Responsible for searching and returning announcements.
+###### /routes/announcements/get_user_announcements.py: Handles retrieving user announcements.
+###### /routes/announcements/get_user_favorite_announcements.py: Contains a function to retrieve a user's favorite announcements.
+###### /routes/announcements/restore_announcement.py: Supports restoring deleted announcements.
+###### /routes/announcements/update_announcement.py: Defines a function to update existing announcements.
 
 #### Media:
 /routes/media/__init__.py:
@@ -47,10 +47,10 @@ There is a set of files in the /routes/announcements directory, each of which de
 
 Files in the /routes/media directory define functions that handle specific endpoints related to media operations in the Flask application. Each of these files contains a function responsible for different media file operations:
 
-##### /routes/media/delete_media.py: Defines a function for deleting media files.
-##### /routes/media/download_media.py: Contains a function responsible for downloading media files.
-##### /routes/media/switch_media: Supports the feature of replacing the main photo in the database.
-##### /routes/media/upload_media: Defines a function for uploading new media files.
+###### /routes/media/delete_media.py: Defines a function for deleting media files.
+###### /routes/media/download_media.py: Contains a function responsible for downloading media files.
+###### /routes/media/switch_media: Supports the feature of replacing the main photo in the database.
+###### /routes/media/upload_media: Defines a function for uploading new media files.
 
 #### Messages:
 /routes/messages/__init__.py:
@@ -58,27 +58,27 @@ Files in the /routes/media directory define functions that handle specific endpo
 
 Files in the /routes/messages directory define functions that handle specific endpoints related to messaging operations in the Flask application:
 
-##### /routes/messages/get_conversations.py: Contains a function to retrieve conversations for a specific user.
-##### /routes/messages/get_messages.py: Defines a function for retrieving messages for a specific user. 
-##### /routes/messages/send_message.py: Contains a function for sending messages from a specific user.
+###### /routes/messages/get_conversations.py: Contains a function to retrieve conversations for a specific user.
+###### /routes/messages/get_messages.py: Defines a function for retrieving messages for a specific user. 
+###### /routes/messages/send_message.py: Contains a function for sending messages from a specific user.
 
 #### Users:
 /routes/users/__init__.py:
 - The __init__.py file defines the blueprint for user-related operations in a Flask application. It imports various view functions responsible for functionalities such as user login, login verification, user registration, updating user details, and deleting user accounts. The users_bp blueprint is created and assigned different URL rules that map to the appropriate view functions and specify the HTTP methods that can be used to invoke these functions.
 
 Within the /routes/users directory, each file handles specific endpoints related to user management:
-##### /routes/users/delete_user.py: Defines a function for deleting a user account.
-##### /routes/users/login_user.py: Contains a function for user login.
-##### /routes/users/register_user.py: Defines a function for user registration.
-##### /routes/users/update_user.py: Contains a function for updating user details.
-##### /routes/users/verify_login.py: Checks whether a given login is free and whether the user can use it to create an account.
+###### /routes/users/delete_user.py: Defines a function for deleting a user account.
+###### /routes/users/login_user.py: Contains a function for user login.
+###### /routes/users/register_user.py: Defines a function for user registration.
+###### /routes/users/update_user.py: Contains a function for updating user details.
+###### /routes/users/verify_login.py: Checks whether a given login is free and whether the user can use it to create an account.
 
 ### Utils:
 /utils/config.py:
 - The config.py file defines a configuration object for the Flask application that sets configuration parameters:
-##### UPLOAD_FOLDER: Defines where user media files are stored, fetched from environment variables.
-##### MAX_CONTENT_LENGTH: Limits file uploads to 3 MB.
-##### MAX_FILE_LENGTH: Restricts individual file size within ZIP archives to 200 KB.
+###### UPLOAD_FOLDER: Defines where user media files are stored, fetched from environment variables.
+###### MAX_CONTENT_LENGTH: Limits file uploads to 3 MB.
+###### MAX_FILE_LENGTH: Restricts individual file size within ZIP archives to 200 KB.
 
 /utils/database_connection.py:
 - database_connection.py enables connecting to a MySQL database in a Flask application using environment variables for database configuration. It imports mysql.connector for database connectivity and os for accessing environment variables. The database_connect() function retrieves database credentials (DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE) from environment variables and establishes a connection to the MySQL database. It returns the database connection object for use throughout the application, ensuring secure and configurable database access. This approach centralizes database configuration, enhancing maintainability and security in the application's database interactions.
