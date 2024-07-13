@@ -322,9 +322,9 @@ CREATE TABLE `favorite_announcements` (
 ```bash
  app.run(debug=True, port=(set your own port))
 ```
-- If you want connect desktop SHOPER.app program with local backend u need to change endpoints in [Shoper-app-frontend/utils/constants.py](https://github.com/Grzegorz96/Shoper-app-frontend/blob/master/utils/constants.py) on:
+- If you want connect desktop SHOPER.app program with local backend u need to change backend_url in [Shoper-app-frontend/utils/constants.py](https://github.com/Grzegorz96/Shoper-app-frontend/blob/master/utils/constants.py) on:
 ```bash
- url = "http://localhost:5000/endpoint"
+ backend_url = "http://localhost:5000"
 ```
 
 
