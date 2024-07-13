@@ -420,7 +420,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `announcements`   | `string`| **Required** Reference to announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int` |  **Required** ID to specify the user. |
+| `announcements`   | `string`| **Required** Reference to announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `integer` |  **Required** ID to specify the user. |
 
 ##### 4. Endpoint to the function that adds favorite announcement to the database. JSON={"announcement_id":integer}.
 ```http
@@ -428,15 +428,15 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Sub-Resource | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
+| `favorite-announcements`   | `string`| **Required** Reference to favorite-announcements resource. | `users` | `string`| **Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. |
 
-##### 5. Endpoint to the function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":bool, "content":string}.
+##### 5. Endpoint to the function that adds the user's messages to the database also creates conversations for the user if necessary. JSON={"conversation_id":integer, "announcement_id":integer, "customer_flag":boolean, "content":string}.
 ```http
   POST /messages/users/<int:user_id>
 ```
 | Resource  | Type    | Description                | Sub-Resource | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `messages`| `string`| **Required** Reference to messages resource. | `users_id` | `int`|**Required** Reference to users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
+| `messages`| `string`| **Required** Reference to messages resource. | `users` | `int`|**Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. |
 
 #### HTTP PATCH METHODS:
 
@@ -446,7 +446,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Resource id  | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `users`   | `string`|  **Required** Reference users resource.  | `users_id` | `int`| **Required** ID to specify the user. | 
+| `users`   | `string`|  **Required** Reference users resource.  | `user_id` | `integer`| **Required** ID to specify the user. | 
 
 ##### 2. Endpoint to the function that changes the specific announcement from active to completed. Updating the flag for a given announcement from active to completed.
 ```http
@@ -454,7 +454,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `integer`| **Required** ID to specify the announcement. | 
 
 ##### 3. Endpoint to the function that changes the specific announcement from completed to active. Updating the flag for a given announcement from completed to active.
 ```http
@@ -462,7 +462,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `integer`| **Required** ID to specify the announcement. | 
 
 ##### 4. Endpoint to the function that changes the specific announcement from completed to deleted. Updating the flag for a given announcement from completed to deleted.
 ```http
@@ -470,7 +470,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to specify the announcement. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `integer`| **Required** ID to specify the announcement. | 
 
 #### HTTP PUT METHODS:
 
@@ -480,7 +480,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Sub-resource | Type    | Description                | Sub-resource id | Type    | Description                |  
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `media`   | `string`| **Required** Reference media resource.  | `users` | `string`| **Required** Reference users sub-resource. |  `user_id` | `int`|  **Required** ID to specify the user. |  
+| `media`   | `string`| **Required** Reference media resource.  | `users` | `string`| **Required** Reference users sub-resource. |  `user_id` | `integer`|  **Required** ID to specify the user. |  
 
 ##### 2. Endpoint to the function that updates the entire announcement record in the database. JSON={"title":string, "location":string, "state":string, "mobile_number":string, "description":string, "price":integer}.
 ```http
@@ -488,17 +488,17 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource        | Type    | Description                | Resource id  | Type    | Description                |
 | :--------       | :-------| :------------------------- | :--------    | :-------| :------------------------- |
-| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `int`| **Required** ID to define the announcement that is to be updated. | 
+| `announcements` | `string`| **Required** Reference announcements resource. | `announcement_id` | `integer`| **Required** ID to define the announcement that is to be updated. | 
 
 #### HTTP DELETE METHODS:
 
-##### 1. Endpoint to the function that removes photos from the server and their paths from the database. JSON={"files": {"filename":string, "is_main_photo":bool}, ...}
+##### 1. Endpoint to the function that removes photos from the server and their paths from the database. JSON={"files": {"filename":string, "is_main_photo":boolean}, ...}
 ```http
   DELETE /media/delete/users/<int:user_id>
 ```
 | Resource        | Type    | Description                | Sub-resource  | Type    | Description                | Sub-resource id  | Type    | Description       |
 | :--------       | :-------| :------------------------- | :--------  | :-------| :------------------------- | :--------  | :-------| :------------------------- |
-| `media` | `string`| **Required** Reference media resource. | `users` | `string`|  **Required** Reference users sub-resource. | `user_id` | `int`| **Required** ID to specify the user. |
+| `media` | `string`| **Required** Reference media resource. | `users` | `string`|  **Required** Reference users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. |
 
 ##### 2. Endpoint to the function that removes favorite announcements from the database for specific favorite announcement.
 ```http
@@ -506,7 +506,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `favorite-announcements` | `string`| **Required** Reference favorite-announcements resource. | `favorite_announcement_id` | `int`| **Required** ID to define which favorite announcement to delete. |
+| `favorite-announcements` | `string`| **Required** Reference favorite-announcements resource. | `favorite_announcement_id` | `integer`| **Required** ID to define which favorite announcement to delete. |
 
 ##### 3. Endpoint to the function that sets a specific user's active flag to 0, resulting in their account being disabled.
 ```http
@@ -514,7 +514,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource                 | Type    | Description                | Resource id  | Type    | Description                | 
 | :--------                | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `users` | `string`| **Required** Reference users resource. | `user_id` | `int`| **Required** ID to specify the user. |
+| `users` | `string`| **Required** Reference users resource. | `user_id` | `integer`| **Required** ID to specify the user. |
 
 ## Lessons learned
 
