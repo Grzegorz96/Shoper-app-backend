@@ -436,7 +436,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 | Resource  | Type    | Description                | Sub-Resource | Type    | Description                | Sub-resource id | Type    | Description                | 
 | :-------- | :-------| :------------------------- | :--------    | :-------| :------------------------- | :--------    | :-------| :------------------------- | 
-| `messages`| `string`| **Required** Reference to messages resource. | `users` | `int`|**Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. |
+| `messages`| `string`| **Required** Reference to messages resource. | `users` | `string`|**Required** Reference to users sub-resource. | `user_id` | `integer`| **Required** ID to specify the user. |
 
 #### HTTP PATCH METHODS:
 
