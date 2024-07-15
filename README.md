@@ -1,4 +1,4 @@
-![shoperlogo](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/shoperlogo.png)
+![shoperlogo](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/shoperlogo.png)
 # API for SHOPER.app
 
 The SHOPER API contains endpoints necessary for the proper operation of the entire project. It supports the database and performs operations on multimedia files located on the server. Using the function, the user can perform any operations related to databases. Thanks to extensive server-side validation, users will not be able to enter information into the database that does not meet the requirements. Files located on the server are also validated, an appropriate user directory is created for each file, and the file itself is verified in detail. In the project, I paid particular attention to the completeness of data and, in case of errors, to returning an appropriate response with an appropriate status code, as well as to optimizing the code related to graphic file management. The program can be run on Windows and Linux systems.
@@ -544,18 +544,18 @@ E-mail: grzesstrzeszewski@gmail.com
 
 ## Screnshoots
 ##### Users table
-![users](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/users.png)
+![users](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/users.png)
 ##### Announcements table
-![announcements](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/announcements.png)
+![announcements](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/announcements.png)
 ##### Categories table
-![categories](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/categories.png)
+![categories](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/categories.png)
 ##### Favorite_announcements table
-![fav_ann](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/fav_ann.png)
+![fav_ann](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/fav_ann.png)
 ##### Conversations table
-![conv](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/conv.png)
+![conv](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/conv.png)
 ##### Messages table
-![messeges](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/messeges.png)
+![messeges](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/messeges.png)
 ##### Announcements_main_photo table
-![main_photo](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/main_photo.png)
+![main_photo](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/main_photo.png)
 ##### Announcements_media table
-![media](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/media.png)
+![media](https://raw.githubusercontent.com/Grzegorz96/Shoper-app-backend/master/docs/readme-images/media.png)
