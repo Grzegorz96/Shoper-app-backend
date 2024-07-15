@@ -544,18 +544,18 @@ E-mail: grzesstrzeszewski@gmail.com
 
 ## Screnshoots
 ##### Users table
-![users](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/3b2578d9-aa49-43b6-a0f1-146b41f43851)
+![users](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/users.png)
 ##### Announcements table
-![announcements](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/5de0d0d4-0d70-4333-b139-a09881e523cb)
+![announcements](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/announcements.png)
 ##### Categories table
-![categories](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/2f781a78-7133-44e8-b348-b2b142b3c070)
+![categories](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/categories.png)
 ##### Favorite_announcements table
-![fav_ann](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/9d3d90bb-d93c-432f-b519-b52bf1bc4c72)
+![fav_ann](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/fav_ann.png)
 ##### Conversations table
-![conv](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/fda14cc4-8947-4518-a51f-9969d252601e)
+![conv](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/conv.png)
 ##### Messages table
-![messeges](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/e04c2e39-d997-47d6-8270-92c758712041)
+![messeges](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/messeges.png)
 ##### Announcements_main_photo table
-![main_photo](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/986415d9-bfdb-4171-b7b5-6ec5b0af3aec)
+![main_photo](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/main_photo.png)
 ##### Announcements_media table
-![media](https://github.com/Grzegorz96/Shoper-app-backend/assets/129303867/7af51079-8906-4dc0-8093-c132a2d81153)
+![media](https://github.com/Grzegorz96/Shoper-app-backend/blob/master/docs/readme-images/media.png)
