@@ -324,7 +324,7 @@ CREATE TABLE `favorite_announcements` (
 ```
 - If you want connect desktop SHOPER.app program with local backend u need to change backend_url in [Shoper-app-frontend/utils/constants.py](https://github.com/Grzegorz96/Shoper-app-frontend/blob/master/utils/constants.py) on:
 ```bash
- backend_url = "http://localhost:5000"
+ backend_url = "http://127.0.0.1:5000"
 ```
 
 
